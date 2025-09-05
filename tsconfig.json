@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "noImplicitOverride": true,
+    "moduleResolution": "bundler",
+    "noEmit": true,
+
+    /* 最佳实践 */
+    "strict": true,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+
+    /* 转译 Typescript */
+    "module": "ES2020",
+    // "sourceMap": true,
+
+    /* 构建一个库时需要开启类型声明 */
+    "declaration": true,
+
+    /* 在 Monorepo 中构建一个库需要开启这个字段，作用是把 .dts 映射回源码，方便 IDE 做“跳到源码定义，更友好的错误定位等
+    但是如果不把 src 目录发布，这个设置开启生成的 .d.ts.map 文件也没什么用
+    */
+    "declarationMap": false,
+
+    "lib": ["es2022"]
+  }
+}
