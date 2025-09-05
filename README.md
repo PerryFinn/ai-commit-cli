@@ -1,6 +1,6 @@
 # ai-commit-cli
 
-> 本项目来源于 [opencommit](https://github.com/di-sukharev/opencommit.git)，非常感谢该作者为开源做出的贡献。
+> 本项目受 [opencommit](https://github.com/di-sukharev/opencommit.git) 的启发。
 
 ## 特性
 

@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "description": "一个利用 AI 服务（OpenAI、Dify 等）自动生成遵循指定标准的提交信息并处理提交过程的命令行工具。用 AI 消灭低价值 commit。🥳",
   "keywords": [
-    "ai",
+    "AI",
+    "git",
     "commit",
-    "cli",
-    "config-conventional",
+    "CLI",
     "openai",
     "Dify"
   ],
