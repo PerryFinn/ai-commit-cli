@@ -1,23 +1,58 @@
-import { add } from "./utils";
+import { cancel, intro, isCancel, outro, select, text } from "@clack/prompts";
+import mri from "mri";
+import color from "picocolors";
+import { name as packageName } from "../package.json";
 
-// 使用更具描述性的变量名
-const sum = add(2, 2);
+const argv = mri<{
+  template?: string;
+  help?: boolean;
+  overwrite?: boolean;
+}>(process.argv.slice(2), {
+  alias: { h: "help", t: "template" },
+  boolean: ["help", "overwrite"],
+  string: ["template"]
+});
 
-// 添加更多上下文信息到日志输出
-console.log("计算结果:", sum);
+console.log("argv :>> ", argv);
 
-// 可以添加类型注解提高代码可读性
-const typedSum: number = add(2, 2);
-console.log("带类型的计算结果:", typedSum);
+const cwd = process.cwd();
 
-// 可以添加错误处理
-try {
-  const safeSum = add(2, 2);
-  console.log("安全的计算结果:", safeSum);
-} catch (error) {
-  console.error("计算出错:", error);
+async function main() {
+  intro(color.inverse(packageName));
+
+  const name = await text({
+    message: "What is your name?",
+    placeholder: "Anonymous"
+  });
+  if (isCancel(name)) {
+    cancel("Operation cancelled");
+    return process.exit(0);
+  }
+
+  const projectType = await select({
+    message: "Pick a project type.",
+    options: [
+      { value: "ts", label: "TypeScript" },
+      { value: "js", label: "JavaScript" },
+      { value: "coffee", label: "CoffeeScript", hint: "oh no" }
+    ]
+  });
+
+  if (isCancel(projectType)) {
+    cancel("Operation cancelled");
+    return process.exit(0);
+  }
+
+  outro(color.inverse(packageName));
 }
 
-export type DemoType = {
-  name: string;
-};
+main();
+
+process.on("uncaughtException", (error) => {
+  if (error instanceof Error && error.name === "ExitPromptError") {
+    console.log("👋 See you next time!");
+  } else {
+    // Rethrow unknown errors
+    throw error;
+  }
+});
