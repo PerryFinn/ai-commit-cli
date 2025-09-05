@@ -1,15 +1,22 @@
 {
-  "name": "create-npm-package",
-  "version": "1.0.6",
-  "description": "创建一个 npm 包的工程模板",
-  "keywords": [],
-  "homepage": "https://github.com/PerryFinn/create-npm-package#readme",
+  "name": "@perryfinn/ai-commit-cli",
+  "version": "0.0.1",
+  "description": "一个利用 AI 服务（OpenAI、Dify 等）自动生成遵循指定标准的提交信息并处理提交过程的命令行工具。用 AI 消灭低价值 commit。🥳",
+  "keywords": [
+    "ai",
+    "commit",
+    "cli",
+    "config-conventional",
+    "openai",
+    "Dify"
+  ],
+  "homepage": "https://github.com/PerryFinn/ai-commit-cli#readme",
   "bugs": {
-    "url": "https://github.com/PerryFinn/create-npm-package/issues"
+    "url": "https://github.com/PerryFinn/ai-commit-cli/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PerryFinn/create-npm-package.git"
+    "url": "git+https://github.com/PerryFinn/ai-commit-cli.git"
   },
   "license": "MIT",
   "author": "PerryFinn <perryfinn@163.com>",
@@ -30,6 +37,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "aigcm": "./dist/index.cjs"
+  },
   "files": [
     "dist"
   ],
@@ -38,6 +48,7 @@
     "build:changeset": "ENABLE_CHANGESET_BUILD=true tsdown",
     "check:exports": "attw --pack . --profile=node16",
     "ci": "biome ci && bun run typecheck && bun run test && bun run build && bun run check:exports",
+    "debug": "bun run build && node ./dist/index.cjs config set DEMO_ENV=demo --arg1 --arg2=123 --arg3=hello",
     "preinstall": "only-allow bun",
     "lint": "biome check . --no-errors-on-unmatched",
     "lint:fix": "biome check --write . --no-errors-on-unmatched",

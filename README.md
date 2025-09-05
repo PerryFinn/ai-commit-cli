@@ -1,6 +1,6 @@
-# create-npm-package
+# ai-commit-cli
 
-一个用于快速搭建 npm 包的工程模板，内置 TypeScript、打包、测试、提交规范、发布流程等最佳实践，开箱即用。
+> 本项目来源于 [opencommit](https://github.com/di-sukharev/opencommit.git)，非常感谢该作者为开源做出的贡献。
 
 ## 特性
 
