@@ -1,7 +1,8 @@
 import { cancel, intro, isCancel, outro, select, text } from "@clack/prompts";
 import mri from "mri";
-import color from "picocolors";
+import { inverse } from "picocolors";
 import { name as packageName } from "../package.json";
+import { checkLatestVersion } from "./utils/checkIsLatestVersion";
 
 const argv = mri<{
   template?: string;
@@ -18,7 +19,8 @@ console.log("argv :>> ", argv);
 const cwd = process.cwd();
 
 async function main() {
-  intro(color.inverse(packageName));
+  intro(inverse(packageName));
+  await checkLatestVersion();
 
   const name = await text({
     message: "What is your name?",
@@ -43,7 +45,7 @@ async function main() {
     return process.exit(0);
   }
 
-  outro(color.inverse(packageName));
+  outro(inverse(packageName));
 }
 
 main();
