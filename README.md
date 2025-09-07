@@ -1,6 +1,6 @@
 # ai-commit-cli
 
-> 本项目受 [opencommit](https://github.com/di-sukharev/opencommit.git) 的启发。
+> 本项目受 [opencommit](https://github.com/di-sukharev/opencommit.git) 的启发
 
 ## 特性
 
@@ -27,13 +27,40 @@
 bun install
 ```
 
-## 快速开始（本地演示入口）
+## 快速开始（CLI 示例）
+
+构建 CLI：
 
 ```bash
-bun run src/index.ts
+bun run build
 ```
 
-示例会调用 `src/utils.ts` 中的 `add` 方法并输出计算结果。
+设置与查看配置（AIGCM\_ 前缀）：
+
+```bash
+node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_MAX_TOKEN_INPUT=1024
+node ./dist/index.cjs config get AIGCM_MODEL_ID
+node ./dist/index.cjs config ls
+```
+
+Debug 示例（脚本同 package.json#scripts.debug）：
+
+```bash
+bun run debug
+```
+
+## 配置项取值优先级
+
+从高到低（上层存在即覆盖下层）：
+
+1. 命令行环境变量（进程环境中的 `AIGCM_*`）
+2. 仓库根目录的 `.env` 文件中的 `AIGCM_*`
+3. 配置文件（conf 持久化存储）
+
+补充说明：
+
+- `config set` 仅写入配置文件层，不会修改环境变量或 `.env`。
+- `config get`/`config ls` 会在值后显示来源标识：`[cli]`、`[.env]` 或 `[config]`。
 
 ## 作为库使用
 
@@ -84,8 +111,12 @@ console.log(add(2, 3)); // 5
 ```text
 .
 ├─ src/
-│  ├─ index.ts          # 库入口与对外导出示例
-│  └─ utils.ts          # 示例工具函数（add）
+│  ├─ index.ts                 # CLI 入口
+│  ├─ cli/                     # 子命令与解析器
+│  ├─ config/                  # 配置管理
+│  ├─ types/                   # 类型与 JSON Schema
+│  ├─ utils/                   # 工具函数（含 env 解析）
+│  └─ utils.ts                 # 通用工具
 ├─ tests/
 │  └─ utils.test.ts     # Vitest 示例用例
 ├─ scripts/

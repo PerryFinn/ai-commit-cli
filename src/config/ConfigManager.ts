@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import Conf from "conf";
-import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configJsonSchema } from "../types/config";
-import { type EnvMap, findEnvFile, loadEnvFile } from "../utils/env";
+import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configProperties } from "@/types/config";
+import { type EnvMap, findEnvFile, loadEnvFile } from "@/utils/env";
 
 type SourceTag = "cli" | ".env" | "config";
 
@@ -35,7 +35,7 @@ export class ConfigManager {
     this.store = new Conf<ConfigSchema>({
       projectName: "ai-commit-cli",
       // conf 期望的是一个“属性映射”的 schema，而非完整 JSON Schema，因此仅传入 properties 部分
-      schema: configJsonSchema.properties,
+      schema: configProperties,
       cwd: homedir()
     });
   }
@@ -108,12 +108,7 @@ export class ConfigManager {
    * 依据 JSON Schema 做基本的类型校验
    */
   private assertValidValue<K extends ConfigKey>(key: K, value: unknown): asserts value is ConfigSchema[K] {
-    type JsonSchemaProp = {
-      type: "string" | "number" | "boolean";
-      enum?: readonly unknown[];
-      minimum?: number;
-    };
-    const prop = (configJsonSchema as { properties: Record<string, JsonSchemaProp> }).properties[key];
+    const prop = configProperties[key];
     if (!prop) return;
     const type = prop.type;
     if (type === "boolean" && typeof value !== "boolean") throw new Error(`配置 ${key} 需要 boolean 类型`);
@@ -130,8 +125,7 @@ export class ConfigManager {
    * 说明：仅对来自 env 的值做转换；config store 中的数据维持原样
    */
   private castValue<K extends ConfigKey>(key: K, raw: string): ConfigSchema[K] {
-    type JsonSchemaProp = { type: "string" | "number" | "boolean" };
-    const prop = (configJsonSchema as { properties: Record<string, JsonSchemaProp> }).properties[key];
+    const prop = configProperties[key];
     if (!prop) return raw as unknown as ConfigSchema[K];
     switch (prop.type) {
       case "boolean":

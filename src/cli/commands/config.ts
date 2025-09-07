@@ -1,7 +1,7 @@
 import { log } from "@clack/prompts";
 import pc from "picocolors";
-import { ConfigManager } from "../../config/ConfigManager";
-import { CONFIG_KEYS, type ConfigKey, configJsonSchema } from "../../types/config";
+import { ConfigManager } from "@/config/ConfigManager";
+import { CONFIG_KEYS, type ConfigKey, configProperties } from "@/types/config";
 
 /**
  * 将 "KEY=value" 形式解析为键值
@@ -92,12 +92,7 @@ const normalizeCliEnv = (env: Record<string, string | undefined>): Record<string
  * 根据 JSON Schema 对字符串做类型转化与校验
  */
 const coerceValueForKey = (key: ConfigKey, raw: string): unknown => {
-  type JsonSchemaProp = {
-    type: "string" | "number" | "boolean";
-    enum?: readonly unknown[];
-    minimum?: number;
-  };
-  const prop = (configJsonSchema as { properties: Record<string, JsonSchemaProp> }).properties[key];
+  const prop = configProperties[key];
   if (!prop) return raw;
   if (prop.type === "boolean") {
     if (raw === "true" || raw === "1") return true;

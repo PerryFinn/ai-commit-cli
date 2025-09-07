@@ -51,6 +51,15 @@ export interface ConfigSchema {
 }
 
 /**
+ * JSON Schema 属性类型（用于运行时校验）
+ */
+export type JSONSchemaProperty = {
+  type: "string" | "number" | "boolean";
+  enum?: readonly unknown[];
+  minimum?: number;
+};
+
+/**
  * 配置键常量数组，便于运行时遍历与校验
  */
 export const CONFIG_KEYS = [
@@ -70,23 +79,28 @@ export const CONFIG_KEYS = [
 export type ConfigKey = (typeof CONFIG_KEYS)[number];
 
 /**
+ * 可复用的属性定义映射，供 conf.schema 与运行时类型推断使用
+ */
+export const configProperties: Record<ConfigKey, JSONSchemaProperty> = {
+  AIGCM_MODEL_ID: { type: "string" },
+  AIGCM_LLM_PROVIDER: { type: "string", enum: Object.values(LLMProvider) },
+  AIGCM_DIFY_AUTH_ID: { type: "string" },
+  AIGCM_PROMPT_MODULE: { type: "string" },
+  AIGCM_LANGUAGE: { type: "string", enum: Object.values(Language) },
+  AIGCM_ONE_LINE_COMMIT: { type: "boolean" },
+  AIGCM_OMIT_COMMIT_SCOPE: { type: "boolean" },
+  AIGCM_MAX_TOKEN_INPUT: { type: "number", minimum: 0 },
+  AIGCM_MAX_TOKEN_OUTPUT: { type: "number", minimum: 0 },
+  AIGCM_API_KEY: { type: "string" },
+  AIGCM_BASE_URL: { type: "string" }
+} as const;
+
+/**
  * JSON Schema（与上面的接口对齐）
  * 说明：用于 conf 在运行时做基础校验。
  */
 export const configJsonSchema = {
   type: "object",
   additionalProperties: false,
-  properties: {
-    AIGCM_MODEL_ID: { type: "string" },
-    AIGCM_LLM_PROVIDER: { type: "string", enum: Object.values(LLMProvider) },
-    AIGCM_DIFY_AUTH_ID: { type: "string" },
-    AIGCM_PROMPT_MODULE: { type: "string" },
-    AIGCM_LANGUAGE: { type: "string", enum: Object.values(Language) },
-    AIGCM_ONE_LINE_COMMIT: { type: "boolean" },
-    AIGCM_OMIT_COMMIT_SCOPE: { type: "boolean" },
-    AIGCM_MAX_TOKEN_INPUT: { type: "number", minimum: 0 },
-    AIGCM_MAX_TOKEN_OUTPUT: { type: "number", minimum: 0 },
-    AIGCM_API_KEY: { type: "string" },
-    AIGCM_BASE_URL: { type: "string" }
-  }
+  properties: configProperties
 } as const;

@@ -89,7 +89,7 @@ function printHelp(): void {
     "  aigcm config get AIGCM_MODEL_ID",
     "  aigcm config ls"
   ];
-  log.info("\n" + lines.join("\n") + "\n");
+  log.info(`\n${lines.join("\n")}\n`);
 }
 
 function printConfigHelp(): void {

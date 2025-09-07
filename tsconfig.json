@@ -28,6 +28,12 @@
     */
     "declarationMap": false,
 
-    "lib": ["es2022"]
+    "lib": ["es2022"],
+
+    /* 路径别名：@ 指向 src 目录 */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   }
 }
