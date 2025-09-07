@@ -48,7 +48,7 @@
     "build:changeset": "ENABLE_CHANGESET_BUILD=true tsdown",
     "check:exports": "attw --pack . --profile=node16",
     "ci": "biome ci && bun run typecheck && bun run test && bun run build && bun run check:exports",
-    "debug": "bun run build && node ./dist/index.cjs config set DEMO_ENV=demo --arg1 --arg2=123 --arg3=hello",
+    "debug": "bun run build && AIGCM_LLM_PROVIDER=OPEN_AI node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_DEMOTEST=true AIGCM_MAX_TOKEN_INPUT=1024 && node ./dist/index.cjs config ls",
     "preinstall": "only-allow bun",
     "lint": "biome check . --no-errors-on-unmatched",
     "lint:fix": "biome check --write . --no-errors-on-unmatched",
@@ -79,6 +79,7 @@
     "@clack/prompts": "^0.11.0",
     "@inquirer/prompts": "^7.8.4",
     "chalk": "^5.6.0",
+    "conf": "^14.0.0",
     "execa": "^9.6.0",
     "mri": "^1.2.0",
     "picocolors": "^1.1.1"
