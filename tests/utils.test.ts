@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatErrorMessage, isValidConfigKey, padCenter } from "../src/utils";
+import { formatErrorMessage, isValidConfigKey, padCenter } from "@/utils";
 
 describe("utils", () => {
   it("padCenter should center text with spaces by default", () => {

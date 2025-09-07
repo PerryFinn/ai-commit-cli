@@ -39,10 +39,11 @@ export async function runCLI(argvInput: string[] = process.argv.slice(2)): Promi
 
 async function handleConfig(subcommand: string | undefined, args: string[]): Promise<CLIResult> {
   await bootstrapIntro();
+  const processEnv = process.env as Record<string, string | undefined>;
   try {
     switch (subcommand) {
       case "set": {
-        await handleConfigSet(args, process.env as Record<string, string | undefined>);
+        await handleConfigSet(args, processEnv);
         await outroOk();
         return 0;
       }
@@ -53,13 +54,13 @@ async function handleConfig(subcommand: string | undefined, args: string[]): Pro
           await outroOk();
           return 1;
         }
-        await handleConfigGet(key, process.env as Record<string, string | undefined>);
+        await handleConfigGet(key, processEnv);
         await outroOk();
         return 0;
       }
       case "ls":
       case "list": {
-        await handleConfigList(process.env as Record<string, string | undefined>);
+        await handleConfigList(processEnv);
         await outroOk();
         return 0;
       }

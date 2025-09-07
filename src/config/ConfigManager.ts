@@ -19,7 +19,7 @@ export interface ValueWithSource<T> {
  * - 三层优先级：命令行传入的 env > 本地 .env > 配置文件存储
  */
 export class ConfigManager {
-  private readonly store: Conf<ConfigSchema>;
+  readonly #store: Conf<ConfigSchema>;
   private readonly cliEnv: EnvMap;
   private readonly dotEnv: EnvMap;
 
@@ -32,7 +32,7 @@ export class ConfigManager {
     this.dotEnv = envFile ? loadEnvFile(envFile) : {};
 
     // conf 持久化（最低优先级）
-    this.store = new Conf<ConfigSchema>({
+    this.#store = new Conf<ConfigSchema>({
       projectName: "ai-commit-cli",
       // conf 期望的是一个“属性映射”的 schema，而非完整 JSON Schema，因此仅传入 properties 部分
       schema: configProperties,
@@ -51,7 +51,7 @@ export class ConfigManager {
     if (key in this.dotEnv) {
       return { value: this.castValue(key, this.dotEnv[key] as string), source: ".env" };
     }
-    return { value: this.store.get(key) as ConfigSchema[K], source: this.store.has(key) ? "config" : undefined };
+    return { value: this.#store.get(key) as ConfigSchema[K], source: this.#store.has(key) ? "config" : undefined };
   }
 
   /**
@@ -60,7 +60,7 @@ export class ConfigManager {
   public set<K extends ConfigKey>(key: K, value: ConfigSchema[K]): void {
     this.assertValidKey(key);
     this.assertValidValue(key, value);
-    this.store.set(key, value as unknown as never);
+    this.#store.set(key, value as unknown as never);
   }
 
   /**
@@ -69,7 +69,7 @@ export class ConfigManager {
   public has<K extends ConfigKey>(key: K): boolean {
     if (key in this.cliEnv) return true;
     if (key in this.dotEnv) return true;
-    return this.store.has(key);
+    return this.#store.has(key);
   }
 
   /**
@@ -86,8 +86,8 @@ export class ConfigManager {
         result[key] = { value: this.castValue(key, this.dotEnv[key] as string), source: ".env" };
         continue;
       }
-      if (this.store.has(key)) {
-        result[key] = { value: this.store.get(key), source: "config" };
+      if (this.#store.has(key)) {
+        result[key] = { value: this.#store.get(key), source: "config" };
       } else {
         result[key] = { value: undefined, source: undefined };
       }
@@ -100,7 +100,7 @@ export class ConfigManager {
    */
   private assertValidKey(key: string): asserts key is ConfigKey {
     if (!CONFIG_KEYS.includes(key as ConfigKey)) {
-      throw new Error(`不支持的配置键：${key}`);
+      throw new Error(`不支持的配置 key: ${key}`);
     }
   }
 

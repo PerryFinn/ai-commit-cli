@@ -1,7 +1,7 @@
 import Conf from "conf";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConfigManager } from "../../src/config/ConfigManager";
-import { type ConfigSchema, Language, LLMProvider } from "../../src/types/config";
+import { ConfigManager } from "@/config/ConfigManager";
+import { type ConfigSchema, Language, LLMProvider } from "@/types/config";
 
 vi.mock("conf");
 

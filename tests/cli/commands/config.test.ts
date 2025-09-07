@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as Cmd from "../../../src/cli/commands/config";
-import { ConfigManager } from "../../../src/config/ConfigManager";
+import * as Cmd from "@/cli/commands/config";
+import { ConfigManager } from "@/config/ConfigManager";
 
-vi.mock("../../../src/config/ConfigManager");
+vi.mock("@/config/ConfigManager");
 
 describe("CLI config commands", () => {
   beforeEach(() => {

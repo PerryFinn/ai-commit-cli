@@ -20,7 +20,9 @@ export const checkLatestVersion = async (): Promise<void> => {
   if (latestVersion && latestVersion !== curPkgVersion) {
     const installCmd = `npm install -g ${pkgName}@latest`;
     log.info(
-      yellow(`✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）。让 AI 帮你写得更顺手：${installCmd}`)
+      yellow(
+        `✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）。快来更新，让 AI 帮你写得更顺手：${installCmd}`
+      )
     );
   }
 };
