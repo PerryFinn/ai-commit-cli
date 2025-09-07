@@ -1,3 +1,5 @@
+import type { Schema } from "conf";
+
 /**
  * 配置类型与 JSON Schema 定义
  * 说明：本文件定义了 CLI 的 11 个配置项、对应的 TypeScript 类型、
@@ -57,6 +59,7 @@ export type JSONSchemaProperty = {
   type: "string" | "number" | "boolean";
   enum?: readonly unknown[];
   minimum?: number;
+  maximum?: number;
 };
 
 /**
@@ -93,14 +96,4 @@ export const configProperties: Record<ConfigKey, JSONSchemaProperty> = {
   AIGCM_MAX_TOKEN_OUTPUT: { type: "number", minimum: 0 },
   AIGCM_API_KEY: { type: "string" },
   AIGCM_BASE_URL: { type: "string" }
-} as const;
-
-/**
- * JSON Schema（与上面的接口对齐）
- * 说明：用于 conf 在运行时做基础校验。
- */
-export const configJsonSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: configProperties
 } as const;

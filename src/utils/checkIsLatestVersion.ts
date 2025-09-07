@@ -18,10 +18,10 @@ export const getAICommitCLILatestVersion: () => Promise<string | undefined> = as
 export const checkLatestVersion = async (): Promise<void> => {
   const latestVersion = await getAICommitCLILatestVersion();
   if (latestVersion && latestVersion !== curPkgVersion) {
-    const installCmd = `npm install -g ${pkgName}@latest`;
+    const installCmdPrompt = `npm install -g ${pkgName}@latest`;
     log.info(
       yellow(
-        `✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）。快来更新，让 AI 帮你写得更顺手：${installCmd}`
+        `✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）。快来更新，让 AI 帮你写得更顺手：${installCmdPrompt}`
       )
     );
   }

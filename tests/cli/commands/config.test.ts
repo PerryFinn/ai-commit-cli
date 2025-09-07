@@ -45,7 +45,7 @@ describe("CLI config commands", () => {
 
   it("set should error on malformed pair", async () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    await Cmd.handleConfigSet(["INVALID"], {});
+    await Cmd.handleConfigSet(["INVALID_KEY"], {});
     spy.mockRestore();
   });
 
