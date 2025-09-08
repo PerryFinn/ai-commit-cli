@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import Conf from "conf";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigManager } from "@/config/ConfigManager";
@@ -69,5 +71,24 @@ describe("ConfigManager", () => {
     const all = mgr.getAll();
     expect(all.AIGCM_API_KEY.source).toBe("cli");
     expect(all.AIGCM_MODEL_ID.source).toBe("config");
+  });
+
+  it("should load values from .env file", () => {
+    const envPath = path.join(process.cwd(), ".env");
+    const original = fs.existsSync(envPath) ? fs.readFileSync(envPath, "utf8") : undefined;
+
+    try {
+      fs.writeFileSync(envPath, "AIGCM_MODEL_ID=dotenv-model");
+
+      const mgr = new ConfigManager();
+      expect(mgr.get("AIGCM_MODEL_ID").value).toBe("dotenv-model");
+      expect(mgr.get("AIGCM_MODEL_ID").source).toBe(".env");
+    } finally {
+      if (original !== undefined) {
+        fs.writeFileSync(envPath, original);
+      } else {
+        fs.unlinkSync(envPath);
+      }
+    }
   });
 });
