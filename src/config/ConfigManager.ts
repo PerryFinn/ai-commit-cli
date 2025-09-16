@@ -135,7 +135,6 @@ export class ConfigManager {
         if (Number.isNaN(n)) return undefined as unknown as ConfigSchema[K];
         return n as unknown as ConfigSchema[K];
       }
-      case "string":
       default:
         return raw as unknown as ConfigSchema[K];
     }

@@ -15,6 +15,10 @@
 - 使用 Volta 固定 Node 版本，确保一致的本地/CI 环境
 - `attw`（AreTheTypesWrong）导出与类型正确性校验
 
+## 贡献指南
+
+请参阅 [Repository Guidelines](AGENTS.md) 了解项目结构、开发流程与提交规范。
+
 ## 环境要求
 
 - Node >= 22（Volta 固定为 22.19.0）

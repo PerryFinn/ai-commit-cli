@@ -1,5 +1,3 @@
-import type { Schema } from "conf";
-
 /**
  * 配置类型与 JSON Schema 定义
  * 说明：本文件定义了 CLI 的 11 个配置项、对应的 TypeScript 类型、

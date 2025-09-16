@@ -1,7 +1,6 @@
 import { log } from "@clack/prompts";
 import pc from "picocolors";
 import { runCLI } from "./cli/parser";
-import { checkLatestVersion } from "./utils/checkIsLatestVersion";
 
 async function main() {
   // await checkLatestVersion();

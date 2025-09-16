@@ -101,7 +101,7 @@ function printConfigHelp(): void {
     "  ls                       列出所有配置",
     ""
   ];
-  log.info("\n" + lines.join("\n") + "\n");
+  log.info(`\n${lines.join("\n")}\n`);
 }
 
 function showIntro(): void {
