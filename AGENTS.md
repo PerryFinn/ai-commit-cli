@@ -6,7 +6,7 @@
 - Runtime artifacts land in `dist/` after builds; keep it out of commits. Shared scripts and tooling live in `scripts/`, `docs/`, and the root config files (`tsconfig.json`, `tsdown.config.ts`, `vitest.config.ts`, `bunfig.toml`).
 
 ## Build, Test, and Development Commands
-- Install dependencies with `bun install` (other package managers are blocked by `only-allow bun`).
+- Install dependencies with `bun install`; Bun is configured for the `isolated` linker so installs mirror pnpm-style layouts under `node_modules/.bun/`. Other managers work, but keep `bun.lock` the source of truth.
 - `bun run build` compiles the CLI via tsdown, emitting CJS/ESM bundles and type declarations to `dist/`.
 - `bun run lint`, `bun run lint:fix`, and `bun run typecheck` keep formatting and types clean; run them before pushing.
 - Use `bun run test` for the full suite, `bun run test:watch` while iterating, and `bun run test:coverage` to review coverage locally.

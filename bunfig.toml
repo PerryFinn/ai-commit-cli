@@ -6,3 +6,5 @@ coverageThreshold = 0.9
 
 [install]
 registry = "https://registry.npmmirror.com"
+# use pnpm-style layout to avoid phantom dependencies
+linker = "isolated"
