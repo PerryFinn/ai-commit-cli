@@ -45,9 +45,3 @@
 
 ## 协作说明
 - 与 Codex 协作时，所有回复必须使用中文。
-
-## 常用脚本速查
-- `bun run lint`：执行 Biome 校验，确保格式与 lint 规则通过。
-- `bun run lint:fix`：自动格式化并修复可处理的 lint 问题。
-- `bun run test` / `bun run test:watch` / `bun run test:coverage`：运行 Vitest 全量测试、监听模式或覆盖率报告。
-- `bun run ci`：依次执行 lint、typecheck、构建与导出检查，作为 PR 前置校验。
