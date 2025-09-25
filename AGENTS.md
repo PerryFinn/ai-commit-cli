@@ -1,32 +1,53 @@
-# Repository Guidelines
+# 仓库协作指南
 
-## Project Structure & Module Organization
-- Source lives in `src/`; `src/index.ts` exposes the CLI entry point, while `src/cli/`, `src/config/`, `src/types/`, and `src/utils/` hold command handlers, configuration helpers, shared types, and utilities.
-- Tests reside in `tests/`, mirroring feature folders (`tests/cli/`, `tests/config/`, etc.) and use `*.test.ts` naming so Vitest auto-discovers them.
-- Runtime artifacts land in `dist/` after builds; keep it out of commits. Shared scripts and tooling live in `scripts/`, `docs/`, and the root config files (`tsconfig.json`, `tsdown.config.ts`, `vitest.config.ts`, `bunfig.toml`).
+## 项目结构与模块划分
+- 源码位于 `src/`：`src/index.ts` 暴露 CLI 入口；`src/cli/`、`src/config/`、`src/types/`、`src/utils/` 分别存放命令处理、配置工具、共享类型与通用工具。
+- 测试位于 `tests/`，目录结构与功能模块对应（例如 `tests/cli/`、`tests/config/`），统一命名为 `*.test.ts` 以便 Vitest 自动发现。
+- 构建产物输出到 `dist/`，不要提交；项目脚本与工具配置位于 `scripts/`、`docs/` 以及 `tsconfig.json`、`tsdown.config.ts`、`vitest.config.ts`、`bunfig.toml` 等根目录文件。
 
-## Build, Test, and Development Commands
-- Install dependencies with `bun install`; Bun is configured for the `isolated` linker so installs mirror pnpm-style layouts under `node_modules/.bun/`. Other managers work, but keep `bun.lock` the source of truth.
-- `bun run build` compiles the CLI via tsdown, emitting CJS/ESM bundles and type declarations to `dist/`.
-- `bun run lint`, `bun run lint:fix`, and `bun run typecheck` keep formatting and types clean; run them before pushing.
-- Use `bun run test` for the full suite, `bun run test:watch` while iterating, and `bun run test:coverage` to review coverage locally.
-- `bun run ci` chains lint, typecheck, tests, build, and export checks; it should succeed before opening a PR.
+## 构建与开发命令
+- 使用 `bun install` 安装依赖；Bun 采用 `isolated` linker，目录结构类似 pnpm，其他包管工具亦可使用，但以 `bun.lock` 为准。
+- `bun run build`：通过 tsdown 构建 CLI，生成 CJS/ESM 及类型声明到 `dist/`。
+- `bun run lint`、`bun run lint:fix`、`bun run typecheck`：保证格式、lint 与类型检查通过，提交前务必执行。
+- `bun run test`、`bun run test:watch`、`bun run test:coverage`：分别运行一次性测试、监听模式与覆盖率报告。
+- `bun run ci`：串行执行 lint、typecheck、构建与导出检查，是 PR 前置检查。
 
-## Coding Style & Naming Conventions
-- Biome enforces two-space indentation, LF line endings, 120-character lines, double quotes, and semicolons; rely on `bun run lint:fix` for formatting.
-- Prefer TypeScript strictness: explicit return types for exported APIs and `readonly` where possible. Organize modules so shared helpers live in `src/utils/` and re-export through `src/index.ts` when needed.
-- Use camelCase for variables/functions, PascalCase for classes/types, and kebab-case for file names unless a file exports a class (e.g., `ConfigManager.ts`).
+## 编码规范与命名约定
+- 使用 Biome 维持两空格缩进、LF 行尾、120 字符行宽、双引号与分号；格式化可执行 `bun run lint:fix`。
+- 遵循 TypeScript 严格模式：导出 API 显式声明返回类型，能使用 `readonly` 时就使用；共享工具集中放在 `src/utils/` 并按需从 `src/index.ts` 重新导出。
+- 变量与函数使用 camelCase，类与类型使用 PascalCase，文件名默认使用 kebab-case（导出类的文件如 `ConfigManager.ts` 可例外）。
+- **禁止使用 TypeScript `enum`**，统一采用 `as const` 对象结合联合类型，例如：
 
-## Testing Guidelines
-- Vitest is the testing framework; create colocated spec files under `tests/` using descriptive names like `cli/config.test.ts`.
-- `bunfig.toml` enforces 90% line and function coverage; ensure new features include unit or integration tests to maintain this bar.
-- Prefer mocking external services, but validate CLI flows end-to-end via the existing command tests.
+  ```ts
+  export const Language = {
+    zh_CN: "zh_CN",
+    en: "en"
+  } as const;
 
-## Commit & Pull Request Guidelines
-- Commitlint requires Conventional Commits (e.g., `feat(cli): add dify provider`); Husky runs `bun run precommit` to lint and typecheck staged changes.
-- Each PR should summarize behavior changes, list manual test steps, and link relevant issues. Attach CLI output or screenshots if UX changes.
-- When publishing user-facing changes, run `bunx changeset` to record release notes before merging.
+  export type Language = (typeof Language)[keyof typeof Language];
+  ```
 
-## Environment & Tooling
-- Target Node 22.x (managed via Volta) and Bun >= 1.0.0. Align local versions with the project by running `volta install` if needed.
-- Configure required AI provider keys through `AIGCM_*` environment variables, `.env`, or the CLI `config` command (`node ./dist/index.cjs config set ...`).
+## 测试规范
+- 使用 Vitest；测试文件应放在 `tests/` 下并与功能模块对应，命名为 `*.test.ts`。
+- 通过脚本 `bun run test` 执行完整测试，需要监听或覆盖率时使用 `bun run test:watch`、`bun run test:coverage`。
+- 优先 mock 外部依赖，但关键 CLI 流程需覆盖端到端测试。
+
+## 提交与 PR 规范
+- 遵循 Conventional Commits 规范，例如 `feat(cli): add dify provider`。
+- **所有 git commit 信息必须使用中文**，同时保持 Conventional Commits 结构。
+- `bun run precommit`（Biome CI + typecheck）由 Husky 在 `pre-commit` 钩子中触发，提交前请确保通过。
+- PR 描述需包含行为变更摘要、手动测试步骤与关联 issue；若存在交互改动，请附上 CLI 输出或截图。
+- 面向用户的改动在合并前执行 `bunx changeset` 记录发布说明。
+
+## 环境与工具
+- 要求 Node 22.x（建议通过 Volta 管理）与 Bun ≥ 1.0.0；必要时执行 `volta install` 对齐版本。
+- 通过 `AIGCM_*` 环境变量、`.env` 文件或 CLI 命令（`node ./dist/index.cjs config set ...`）配置所需的 AI 服务凭据与参数。
+
+## 协作说明
+- 与 Codex 协作时，所有回复必须使用中文。
+
+## 常用脚本速查
+- `bun run lint`：执行 Biome 校验，确保格式与 lint 规则通过。
+- `bun run lint:fix`：自动格式化并修复可处理的 lint 问题。
+- `bun run test` / `bun run test:watch` / `bun run test:coverage`：运行 Vitest 全量测试、监听模式或覆盖率报告。
+- `bun run ci`：依次执行 lint、typecheck、构建与导出检查，作为 PR 前置校验。
