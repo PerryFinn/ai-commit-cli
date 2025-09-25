@@ -7,20 +7,24 @@
 /**
  * 可用的大语言模型提供商
  */
-export enum LLMProvider {
-  OPEN_AI = "OPEN_AI",
-  OLLAMA = "OLLAMA",
-  GEMINI = "GEMINI",
-  DIFY = "DIFY"
-}
+export const LLMProvider = {
+  OPEN_AI: "OPEN_AI",
+  OLLAMA: "OLLAMA",
+  GEMINI: "GEMINI",
+  DIFY: "DIFY"
+} as const;
+
+export type LLMProvider = (typeof LLMProvider)[keyof typeof LLMProvider];
 
 /**
  * 语言枚举
  */
-export enum Language {
-  zh_CN = "zh_CN",
-  en = "en"
-}
+export const Language = {
+  zh_CN: "zh_CN",
+  en: "en"
+} as const;
+
+export type Language = (typeof Language)[keyof typeof Language];
 
 /**
  * 配置 Schema 接口（所有字段均为可选，按需填写）
