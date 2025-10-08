@@ -56,11 +56,14 @@ export class ConfigManager {
 
   /**
    * 设置某个键的值（直接持久化到 config，注意：不会写入 .env）
+   * 支持传入字符串，会自动根据 schema 进行类型转换与校验
    */
-  public set<K extends ConfigKey>(key: K, value: ConfigSchema[K]): void {
+  public set<K extends ConfigKey>(key: K, value: ConfigSchema[K] | string): void {
     this.assertValidKey(key);
-    this.assertValidValue(key, value);
-    this.#store.set(key, value as unknown as never);
+    // 如果传入的是字符串，先进行类型转换
+    const castedValue = typeof value === "string" ? this.castValue(key, value) : value;
+    this.assertValidValue(key, castedValue);
+    this.#store.set(key, castedValue as unknown as never);
   }
 
   /**
@@ -126,17 +129,29 @@ export class ConfigManager {
    */
   private castValue<K extends ConfigKey>(key: K, raw: string): ConfigSchema[K] {
     const prop = configProperties[key];
-    if (!prop) return raw as unknown as ConfigSchema[K];
+    if (!prop) return raw as ConfigSchema[K];
+
     switch (prop.type) {
-      case "boolean":
-        return (raw === "true" || raw === "1") as unknown as ConfigSchema[K];
+      case "boolean": {
+        if (raw === "true" || raw === "1") return true as ConfigSchema[K];
+        if (raw === "false" || raw === "0") return false as ConfigSchema[K];
+        throw new Error(`配置 ${key} 需要 boolean 类型`);
+      }
       case "number": {
         const n = Number(raw);
-        if (Number.isNaN(n)) return undefined as unknown as ConfigSchema[K];
-        return n as unknown as ConfigSchema[K];
+        if (Number.isNaN(n)) throw new Error(`配置 ${key} 需要 number 类型`);
+        if (typeof prop.minimum === "number" && n < prop.minimum) {
+          throw new Error(`配置 ${key} 不能小于 ${prop.minimum}`);
+        }
+        return n as ConfigSchema[K];
       }
-      default:
-        return raw as unknown as ConfigSchema[K];
+      default: {
+        // 对于字符串类型，需要验证 enum
+        if (prop.enum && !prop.enum.includes(raw)) {
+          throw new Error(`配置 ${key} 仅允许：${prop.enum.join(", ")}`);
+        }
+        return raw as ConfigSchema[K];
+      }
     }
   }
 }

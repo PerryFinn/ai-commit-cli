@@ -1,7 +1,7 @@
 import { log } from "@clack/prompts";
 import pc from "picocolors";
 import { ConfigManager } from "@/config/ConfigManager";
-import { CONFIG_KEYS, type ConfigKey, configProperties } from "@/types/config";
+import { CONFIG_KEYS, type ConfigKey } from "@/types/config";
 
 /**
  * 将 "KEY=value" 形式解析为键值
@@ -26,9 +26,10 @@ export const handleConfigSet = async (args: string[], cliEnv: Record<string, str
     const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
     for (const p of args) {
       const { key, value } = parseKeyValue(p);
-      const casted = coerceValueForKey(key, value) as string | number | boolean | undefined;
-      manager.set(key, casted);
-      log.info(pc.green(`已设置 ${pc.bold(key)} = ${pc.bold(String(casted))}`));
+      // 直接传递字符串给 ConfigManager，由其负责类型转换与校验
+      manager.set(key, value);
+      const result = manager.get(key);
+      log.info(pc.green(`已设置 ${pc.bold(key)} = ${pc.bold(String(result.value))}`));
     }
   } catch (error) {
     log.error(pc.red((error as Error).message));
@@ -80,31 +81,15 @@ export const handleConfigList = async (cliEnv: Record<string, string | undefined
 
 const padRight = (text: string, len: number): string => text + (text.length < len ? " ".repeat(len - text.length) : "");
 
+/**
+ * 规范化 CLI 环境变量，仅保留 AIGCM_ 前缀的变量
+ */
 const normalizeCliEnv = (env: Record<string, string | undefined>): Record<string, string> => {
   const out: Record<string, string> = {};
   for (const [k, v] of Object.entries(env)) {
-    if (typeof v === "string") out[k] = v;
+    if (k.startsWith("AIGCM_") && typeof v === "string") {
+      out[k] = v;
+    }
   }
   return out;
-};
-
-/**
- * 根据 JSON Schema 对字符串做类型转化与校验
- */
-const coerceValueForKey = (key: ConfigKey, raw: string): unknown => {
-  const prop = configProperties[key];
-  if (!prop) return raw;
-  if (prop.type === "boolean") {
-    if (raw === "true" || raw === "1") return true;
-    if (raw === "false" || raw === "0") return false;
-    throw new Error(`配置 ${key} 需要 boolean 类型`);
-  }
-  if (prop.type === "number") {
-    const n = Number(raw);
-    if (Number.isNaN(n)) throw new Error(`配置 ${key} 需要 number 类型`);
-    if (typeof prop.minimum === "number" && n < prop.minimum) throw new Error(`配置 ${key} 不能小于 ${prop.minimum}`);
-    return n;
-  }
-  if (prop.enum && !prop.enum.includes(raw)) throw new Error(`配置 ${key} 仅允许：${prop.enum.join(", ")}`);
-  return raw;
 };
