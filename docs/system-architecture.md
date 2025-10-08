@@ -2,7 +2,7 @@
 
 本设计文档基于当前 `ai-commit-cli` 代码库，对现有能力与未来扩展方向进行结构化梳理，便于新成员快速理解整体架构并在此基础上演进 AI 辅助提交信息的完整体验。
 
-> **引用说明**：文档中形如 `【F:src/config/ConfigManager.ts†L1-L104】` 的标注用于指向仓库内的源文件及其行号，`F:` 表示文件引用，`†L` 后的数字表示对应的起止行号，便于读者快速定位实现细节。
+> **引用说明**：文档中形如 `【F:src/config/ConfigManager.ts】` 的标注用于指向仓库内的源文件，`F:` 表示文件引用，便于读者快速定位实现细节。
 
 ## 设计目标
 
@@ -36,32 +36,32 @@
 ## 核心模块职责
 
 ### 1. CLI 入口与命令解析
-- `src/index.ts`：初始化 CLI 流程，负责展示欢迎语、捕获 `ExitPromptError` 并统一退出码。【F:src/index.ts†L1-L19】
-- `src/cli/parser.ts`：基于 `mri` 解析命令行参数，路由至各子命令，同时提供 `help` 文案与友好的错误提示。【F:src/cli/parser.ts†L1-L86】
-- `src/cli/commands/config.ts`：实现 `set`/`get`/`ls` 子命令，处理键值解析、类型转换、表格输出与错误提示。【F:src/cli/commands/config.ts†L1-L97】
+- `src/index.ts`：初始化 CLI 流程，负责展示欢迎语、捕获 `ExitPromptError` 并统一退出码。【F:src/index.ts】
+- `src/cli/parser.ts`：基于 `mri` 解析命令行参数，路由至各子命令，同时提供 `help` 文案与友好的错误提示。【F:src/cli/parser.ts】
+- `src/cli/commands/config.ts`：实现 `set`/`get`/`ls` 子命令，处理键值解析、类型转换、表格输出与错误提示。【F:src/cli/commands/config.ts】
 
 ### 2. 配置域
-- `src/types/config.ts`：集中维护 11 个配置项、对应的 TypeScript 类型与 JSON Schema 属性，禁止使用 `enum`，便于 `as const` 推断与运行时校验。【F:src/types/config.ts†L1-L87】
-- `src/config/ConfigManager.ts`：负责配置值的读取、写入、来源标记、类型校验与优先级合并，内部基于 `conf` 实现持久化。【F:src/config/ConfigManager.ts†L1-L104】
-- `docs/config-management-design.md`：对配置系统的工作流程、优先级策略与扩展指南做了进一步说明，可与本总览互相引用以获取细节。【F:docs/config-management-design.md†L1-L68】
+- `src/types/config.ts`：集中维护 11 个配置项、对应的 TypeScript 类型与 JSON Schema 属性，禁止使用 `enum`，便于 `as const` 推断与运行时校验。【F:src/types/config.ts】
+- `src/config/ConfigManager.ts`：负责配置值的读取、写入、来源标记、类型校验与优先级合并，内部基于 `conf` 实现持久化。【F:src/config/ConfigManager.ts】
+- `docs/config-management-design.md`：对配置系统的工作流程、优先级策略与扩展指南做了进一步说明，可与本总览互相引用以获取细节。【F:docs/config-management-design.md】
 
 ### 3. 环境工具与通用工具
-- `src/utils/env.ts`：提供环境变量名规范化、合法性校验、`.env` 查找与解析、环境映射合并等能力，是 ConfigManager 的输入来源之一。【F:src/utils/env.ts†L1-L95】
-- `src/utils.ts`：封装基础字符串与错误信息工具，供 CLI 输出与其他模块复用。【F:src/utils.ts†L1-L17】
-- `src/utils/checkIsLatestVersion.ts`：封装版本检测逻辑，未来可在 CLI 启动时启用提示用户更新。【F:src/utils/checkIsLatestVersion.ts†L1-L24】
+- `src/utils/env.ts`：提供环境变量名规范化、合法性校验、`.env` 查找与解析、环境映射合并等能力，是 ConfigManager 的输入来源之一。【F:src/utils/env.ts】
+- `src/utils.ts`：封装基础字符串与错误信息工具，供 CLI 输出与其他模块复用。【F:src/utils.ts】
+- `src/utils/checkIsLatestVersion.ts`：封装版本检测逻辑，未来可在 CLI 启动时启用提示用户更新。【F:src/utils/checkIsLatestVersion.ts】
 
 ### 4. 测试与质量保障
-- `tests/config/ConfigManager.test.ts`：验证配置优先级、类型校验与来源标记等关键行为，并通过 mock `conf` 避免文件系统依赖。【F:tests/config/ConfigManager.test.ts†L1-L74】
-- `tests/cli/commands/config.test.ts`：确保 CLI 命令层正确调用 ConfigManager、处理参数与错误情况。【F:tests/cli/commands/config.test.ts†L1-L69】
-- `tests/utils.test.ts`：覆盖基础工具函数的行为，保证公共函数稳定。【F:tests/utils.test.ts†L1-L17】
-- `package.json` 中的脚本 `bun run lint|typecheck|test|ci` 形成提交前质量门禁，结合 Husky/Commitlint 保证规范提交（详见仓库根部协作指南）。【F:README.md†L63-L113】
+- `tests/config/ConfigManager.test.ts`：验证配置优先级、类型校验与来源标记等关键行为，并通过 mock `conf` 避免文件系统依赖。【F:tests/config/ConfigManager.test.ts】
+- `tests/cli/commands/config.test.ts`：确保 CLI 命令层正确调用 ConfigManager、处理参数与错误情况。【F:tests/cli/commands/config.test.ts】
+- `tests/utils.test.ts`：覆盖基础工具函数的行为，保证公共函数稳定。【F:tests/utils.test.ts】
+- `package.json` 中的脚本 `bun run lint|typecheck|test|ci` 形成提交前质量门禁，结合 Husky/Commitlint 保证规范提交（详见仓库根部协作指南）。【F:README.md】
 
 ## 运行时流程
 
 1. `node dist/index.cjs` / `bun run debug` → 入口脚本调用 `runCLI()` 并展示 intro/outro。
 2. `runCLI` 使用 `mri` 解析参数，判断主命令：
    - `config` → 进入配置子命令处理。
-   - 其他命令 → 提示未知命令（为未来主功能预留扩展点）。【F:src/cli/parser.ts†L24-L58】
+   - 其他命令 → 提示未知命令（为未来主功能预留扩展点）。【F:src/cli/parser.ts】
 3. 配置子命令中：
    - `ConfigManager` 接受 CLI 环境变量（由 `normalizeCliEnv` 过滤）与 `.env` 文件内容，并加载 `conf` 持久化层。
    - 读取/设置时遵循优先级：CLI env → `.env` → config store，返回值附带 `source`。
