@@ -89,7 +89,7 @@
 4. **交互与回退策略**
    - 使用 `@clack/prompts` 继续提供交互式多选/确认流程。
    - 生成多条候选消息供用户选择，可配合 `AIGCM_ONE_LINE_COMMIT` 与 `AIGCM_OMIT_COMMIT_SCOPE` 控制格式。
-   - 支持失败回退：若 LLM 请求失败，提示用户手动输入或切换 Provider。
+  - 支持失败回退：若 LLM 请求失败，提示用户手动输入。
 
 5. **测试策略**
    - CLI 层：通过 Vitest + `vi.mock` 模拟服务层，断言参数传递与错误处理。
