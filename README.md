@@ -1,6 +1,6 @@
-# create-npm-package
+# ai-commit-cli
 
-一个用于快速搭建 npm 包的工程模板，内置 TypeScript、打包、测试、提交规范、发布流程等最佳实践，开箱即用。
+> 本项目受 [opencommit](https://github.com/di-sukharev/opencommit.git) 的启发
 
 ## 特性
 
@@ -11,15 +11,19 @@
 - Vitest 测试，V8 覆盖率，内置最低 90% 的覆盖率门槛（`bunfig.toml`）
 - Changesets 版本与发布流程，并支持自定义提交消息（`scripts/changeset.commit.ts`）
 - Husky + lint-staged + Commitlint 提交质量门禁（约定式提交）
-- 仅允许使用 Bun 安装依赖（`only-allow bun`），避免包管理混乱
+- 推荐使用 Bun 安装依赖并运行脚本，享受更快的安装与执行速度
 - 使用 Volta 固定 Node 版本，确保一致的本地/CI 环境
 - `attw`（AreTheTypesWrong）导出与类型正确性校验
+
+## 贡献指南
+
+请参阅 [Repository Guidelines](AGENTS.md) 了解项目结构、开发流程与提交规范。
 
 ## 环境要求
 
 - Node >= 22（Volta 固定为 22.19.0）
 - Bun >= 1.0.0
-- 包管理器：仅支持 Bun（`preinstall` 钩子会阻止 npm/yarn/pnpm）
+- 包管理器：推荐使用 Bun；如需使用 npm/pnpm，请确保锁文件与依赖树保持一致
 
 ## 安装
 
@@ -27,13 +31,42 @@
 bun install
 ```
 
-## 快速开始（本地演示入口）
+> 注：仓库在 `bunfig.toml` 中启用了 `linker = "isolated"`，安装结果类似 pnpm 的非平铺结构；若需切换策略，请先删除现有 `node_modules/`。
+
+## 快速开始（CLI 示例）
+
+构建 CLI：
 
 ```bash
-bun run src/index.ts
+bun run build
 ```
 
-示例会调用 `src/utils.ts` 中的 `add` 方法并输出计算结果。
+设置与查看配置（AIGCM\_ 前缀）：
+
+```bash
+node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_MAX_TOKEN_INPUT=1024
+node ./dist/index.cjs config get AIGCM_MODEL_ID
+node ./dist/index.cjs config ls
+```
+
+Debug 示例（脚本同 package.json#scripts.debug）：
+
+```bash
+bun run debug
+```
+
+## 配置项取值优先级
+
+从高到低（上层存在即覆盖下层）：
+
+1. 命令行环境变量（进程环境中的 `AIGCM_*`）
+2. 仓库根目录的 `.env` 文件中的 `AIGCM_*`
+3. 配置文件（conf 持久化存储）
+
+补充说明：
+
+- `config set` 仅写入配置文件层，不会修改环境变量或 `.env`。
+- `config get`/`config ls` 会在值后显示来源标识：`[cli]`、`[.env]` 或 `[config]`。
 
 ## 作为库使用
 
@@ -84,8 +117,12 @@ console.log(add(2, 3)); // 5
 ```text
 .
 ├─ src/
-│  ├─ index.ts          # 库入口与对外导出示例
-│  └─ utils.ts          # 示例工具函数（add）
+│  ├─ index.ts                 # CLI 入口
+│  ├─ cli/                     # 子命令与解析器
+│  ├─ config/                  # 配置管理
+│  ├─ types/                   # 类型与 JSON Schema
+│  ├─ utils/                   # 工具函数（含 env 解析）
+│  └─ utils.ts                 # 通用工具
 ├─ tests/
 │  └─ utils.test.ts     # Vitest 示例用例
 ├─ scripts/
@@ -149,8 +186,8 @@ bun run build:changeset
 
 ## FAQ
 
-- 为什么只能用 Bun 安装依赖？
-  - 本模板使用 `only-allow bun` 在 `preinstall` 阶段强制 Bun，确保依赖树一致性与更快的安装速度。
+- 为什么推荐使用 Bun？
+  - Bun 在安装和执行脚本时更快，且本仓库默认使用 Bun 生成锁文件；若使用其他包管理器，请确保不会覆写 `bun.lock`。
 - Node 版本不满足怎么办？
   - 请将 Node 升级到 >=22，或使用 Volta/`nvm` 切换到合适版本。仓库使用 Volta 固定为 22.19.0。
 - `attw` 检查失败？

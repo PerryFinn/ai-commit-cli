@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 - 环境与前置条件
 
-  - 包管理器：本仓库通过 preinstall 钩子强制使用 Bun（only-allow bun）。不要用 npm/yarn/pnpm 安装依赖，否则会被阻止。
+  - 包管理器：推荐使用 Bun（默认生成 `bun.lock` 并启用 isolated linker）。如果使用 npm/pnpm，请避免覆盖锁文件。
   - 运行时与版本：Node >= 22，Bun >= 1.0（package.json engines 指定）。Volta 固定 Node 版本为 22.19.0（package.json volta）。
   - npm 源：.npmrc 指向 <https://registry.npmmirror.com。>
 

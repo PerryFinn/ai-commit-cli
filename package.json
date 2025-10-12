@@ -1,15 +1,22 @@
 {
-  "name": "create-npm-package",
-  "version": "1.0.6",
-  "description": "创建一个 npm 包的工程模板",
-  "keywords": [],
-  "homepage": "https://github.com/PerryFinn/create-npm-package#readme",
+  "name": "@perryfinn/ai-commit-cli",
+  "version": "0.0.2",
+  "description": "一个利用 AI 服务（OpenAI、Dify 等）自动生成遵循指定标准的提交信息并处理提交过程的命令行工具。用 AI 消灭低价值 commit。🥳",
+  "keywords": [
+    "AI",
+    "git",
+    "commit",
+    "CLI",
+    "openai",
+    "Dify"
+  ],
+  "homepage": "https://github.com/PerryFinn/ai-commit-cli#readme",
   "bugs": {
-    "url": "https://github.com/PerryFinn/create-npm-package/issues"
+    "url": "https://github.com/PerryFinn/ai-commit-cli/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PerryFinn/create-npm-package.git"
+    "url": "git+https://github.com/PerryFinn/ai-commit-cli.git"
   },
   "license": "MIT",
   "author": "PerryFinn <perryfinn@163.com>",
@@ -30,6 +37,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "aigcm": "./dist/index.cjs"
+  },
   "files": [
     "dist"
   ],
@@ -38,7 +48,7 @@
     "build:changeset": "ENABLE_CHANGESET_BUILD=true tsdown",
     "check:exports": "attw --pack . --profile=node16",
     "ci": "biome ci && bun run typecheck && bun run test && bun run build && bun run check:exports",
-    "preinstall": "only-allow bun",
+    "debug": "bun run build && AIGCM_LLM_PROVIDER=OPEN_AI node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_DEMOTEST=true AIGCM_MAX_TOKEN_INPUT=1024 && node ./dist/index.cjs config ls",
     "lint": "biome check . --no-errors-on-unmatched",
     "lint:fix": "biome check --write . --no-errors-on-unmatched",
     "precommit": "biome ci && bun run typecheck",
@@ -64,23 +74,31 @@
       "biome check --write --no-errors-on-unmatched"
     ]
   },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "@inquirer/prompts": "^7.8.6",
+    "chalk": "^5.6.2",
+    "conf": "^15.0.2",
+    "execa": "^9.6.0",
+    "mri": "^1.2.0",
+    "picocolors": "^1.1.1"
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
-    "@biomejs/biome": "2.2.2",
-    "@changesets/cli": "^2.29.6",
+    "@biomejs/biome": "2.2.5",
+    "@changesets/cli": "^2.29.7",
     "@changesets/types": "^6.1.0",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@commitlint/types": "^19.8.1",
-    "@types/bun": "^1.2.21",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/types": "^20.0.0",
+    "@types/bun": "^1.2.23",
     "@types/node": "22.18.1",
     "@vitest/coverage-v8": "^3.2.4",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.6",
-    "only-allow": "^1.2.1",
+    "lint-staged": "^16.2.3",
     "sort-package-json": "^3.4.0",
-    "tsdown": "^0.14.2",
-    "typescript": "^5.9.2",
+    "tsdown": "^0.15.6",
+    "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "engines": {
