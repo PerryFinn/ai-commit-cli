@@ -16,43 +16,36 @@ const parseKeyValue = (pair: string): { key: ConfigKey; value: string } => {
 
 /**
  * config set 命令处理
+ * @throws {Error} 参数错误或配置设置失败时抛出异常
  */
 export const handleConfigSet = async (args: string[], cliEnv: Record<string, string | undefined>): Promise<void> => {
-  try {
-    if (args.length === 0) {
-      log.error(pc.red("请提供至少一个配置项，例如: config set AIGCM_MODEL_ID=gpt-4o"));
-      return;
-    }
-    const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
-    for (const p of args) {
-      const { key, value } = parseKeyValue(p);
-      // 直接传递字符串给 ConfigManager，由其负责类型转换与校验
-      manager.set(key, value);
-      const result = manager.get(key);
-      log.info(pc.green(`已设置 ${pc.bold(key)} = ${pc.bold(String(result.value))}`));
-    }
-  } catch (error) {
-    log.error(pc.red((error as Error).message));
+  if (args.length === 0) {
+    throw new Error("请提供至少一个配置项，例如: config set AIGCM_MODEL_ID=gpt-4o");
+  }
+  const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
+  for (const p of args) {
+    const { key, value } = parseKeyValue(p);
+    // 直接传递字符串给 ConfigManager，由其负责类型转换与校验
+    manager.set(key, value);
+    const result = manager.get(key);
+    log.info(pc.green(`已设置 ${pc.bold(key)} = ${pc.bold(String(result.value))}`));
   }
 };
 
 /**
  * config get 命令处理
+ * @throws {Error} 配置读取失败时抛出异常
  */
 export const handleConfigGet = async (key: string, cliEnv: Record<string, string | undefined>): Promise<void> => {
-  try {
-    if (!CONFIG_KEYS.includes(key as ConfigKey)) {
-      log.warn(pc.red(`不支持的key: ${key}`));
-    }
-    const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
-    const { value, source } = manager.get(key as ConfigKey);
-    if (typeof value === "undefined") {
-      log.info(pc.yellow(`${pc.bold(key)} 未设置`));
-    } else {
-      log.info(`${pc.bold(key)} = ${pc.cyan(String(value))} ${pc.dim(source ? `[${source}]` : "")}`);
-    }
-  } catch (error) {
-    log.error(pc.red((error as Error).message));
+  if (!CONFIG_KEYS.includes(key as ConfigKey)) {
+    log.warn(pc.red(`不支持的key: ${key}`));
+  }
+  const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
+  const { value, source } = manager.get(key as ConfigKey);
+  if (typeof value === "undefined") {
+    log.info(pc.yellow(`${pc.bold(key)} 未设置`));
+  } else {
+    log.info(`${pc.bold(key)} = ${pc.cyan(String(value))} ${pc.dim(source ? `[${source}]` : "")}`);
   }
 };
 
