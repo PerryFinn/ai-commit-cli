@@ -1,6 +1,6 @@
 import Conf from "conf";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConfigManager } from "@/config/ConfigManager";
+import { ConfigManager } from "@/config/config-manager";
 import { type ConfigSchema, Language, LLMProvider } from "@/types/config";
 
 // 关键点1: 模拟 'conf' 模块

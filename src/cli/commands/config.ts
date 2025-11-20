@@ -1,6 +1,6 @@
 import { log } from "@clack/prompts";
 import pc from "picocolors";
-import { ConfigManager } from "@/config/ConfigManager";
+import { ConfigManager } from "@/config/config-manager";
 import { CONFIG_KEYS, type ConfigKey } from "@/types/config";
 
 /**
