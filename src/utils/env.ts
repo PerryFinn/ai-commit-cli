@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { execaSync } from "execa";
+import { getRepoRoot } from "./git";
 
 /**
  * 环境变量键值映射
@@ -39,17 +39,13 @@ export const mergeEnvVars = (sources: EnvMap[]): EnvMap => {
  */
 export const findEnvFile = (startDir: string): string | undefined => {
   // 1) 优先使用 Git 获取仓库根
-  try {
-    const { stdout: repoRoot } = execaSync("git", ["rev-parse", "--show-toplevel"]);
-    if (repoRoot) {
-      const envAtRoot = path.join(repoRoot, ".env");
-      if (fs.existsSync(envAtRoot) && fs.statSync(envAtRoot).isFile()) {
-        return envAtRoot;
-      }
-      return undefined; // 成功定位仓库根但没有 .env，即认为不存在
+  const repoRoot = getRepoRoot(startDir);
+  if (repoRoot) {
+    const envAtRoot = path.join(repoRoot, ".env");
+    if (fs.existsSync(envAtRoot) && fs.statSync(envAtRoot).isFile()) {
+      return envAtRoot;
     }
-  } catch {
-    // 忽略：不是 Git 仓库或 git 不可用，回退到手动向上查找
+    return undefined; // 成功定位仓库根但没有 .env，即认为不存在
   }
 
   // 2) 回退：从 startDir 向上查找（最多 20 层），在遇到仓库根（.git 或 package.json）或文件系统根时停止

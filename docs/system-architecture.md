@@ -29,7 +29,7 @@ graph TB
     subgraph Infrastructure["基础设施层 (Infrastructure)"]
         Config["config/ConfigManager<br/>配置管理"]
         Env["utils/env<br/>环境变量解析"]
-        Git["utils/git<br/>Git 操作（待封装）"]
+        Git["utils/git<br/>Git 操作"]
         Utils["utils/*<br/>通用工具"]
     end
 
@@ -143,12 +143,17 @@ export async function generateCommitMessage(
 
 ### 3. 基础设施增强
 
-**Git 工具封装**：`src/utils/git.ts`
+**Git 工具封装** ✅ 已实现：`src/utils/git.ts`
 
 - `getRepoRoot()`：获取仓库根目录
-- `getStagedDiff()`：获取暂存区 diff
+- `isInsideRepo()`：检查是否在 Git 仓库中
+- `getCurrentBranch()`：获取当前分支名
+- `getStagedFiles()`：获取暂存区文件列表
 - `getStatus()`：获取仓库状态
+- `getStagedDiff()`：获取暂存区 diff
+- `getStagedDiffStat()`：获取 diff 统计信息
 - `commit(message: string)`：执行提交
+- `add(paths?: string[])`：添加文件到暂存区
 
 **配置增强**（如需要）：
 
@@ -186,7 +191,7 @@ export async function generateCommitMessage(
 
 ```text
 Phase 1: 基础设施准备
-  1.1 封装 Git 工具类（utils/git.ts）
+  1.1 封装 Git 工具类（utils/git.ts） ✅ 已完成
   1.2 实现配置验证器
   1.3 定义错误类型
 

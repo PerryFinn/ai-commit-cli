@@ -18,7 +18,7 @@
 - **原问题**：`cli/commands/config.ts` 中的 `normalizeCliEnv` 只过滤 `undefined` 值，未过滤 `AIGCM_` 前缀
 - **解决方案**：在 `normalizeCliEnv` 中添加了前缀过滤逻辑
 - **相关代码**：`src/cli/commands/config.ts` 第 80-88 行
-- **测试覆盖**：`tests/cli/commands/config.test.ts` 中新增了 "应该过滤非 AIGCM_ 前缀的环境变量" 测试
+- **测试覆盖**：`tests/cli/commands/config.test.ts` 中新增了 "应该过滤非 AIGCM\_ 前缀的环境变量" 测试
 
 #### 2. 类型转换逻辑重复 ✅ 已修复
 
@@ -31,31 +31,16 @@
 
 ### 🟡 中优先级（P1 - 功能扩展时需考虑）
 
-#### 3. Git 操作分散
+#### 3. Git 操作分散 ✅ 已修复
 
-- **现状**：`utils/env.ts` 中直接使用 `execaSync` 调用 `git` 命令
-- **问题**：难以测试，未来扩展 Git 操作时逻辑分散
-- **建议**：新增 `src/utils/git.ts` 统一封装 Git 操作
-
-  ```typescript
-  export class GitService {
-    getRepoRoot(): string | undefined {
-      /* ... */
-    }
-    getDiff(options?: DiffOptions): string {
-      /* ... */
-    }
-    getStatus(): GitStatus {
-      /* ... */
-    }
-  }
-  ```
-
-- **重构步骤**：
-  1. 创建 `src/utils/git.ts`，封装所有 Git 相关操作
-  2. 将 `utils/env.ts` 中的 `git rev-parse` 调用迁移到 GitService
-  3. 为 GitService 编写单元测试（使用临时 Git 仓库）
-  4. 更新 `utils/env.ts` 使用 GitService
+- **原问题**：`utils/env.ts` 中直接使用 `execaSync` 调用 `git` 命令
+- **解决方案**：新增 `src/utils/git.ts` 统一封装 Git 操作
+- **实现内容**：
+  - `GitService` 类：提供 `getRepoRoot()`、`isInsideRepo()`、`getCurrentBranch()`、`getStagedFiles()`、`getStatus()`、`getStagedDiff()`、`getStagedDiffStat()`、`commit()`、`add()` 等方法
+  - `getRepoRoot()` 便捷函数：供 `env.ts` 使用
+  - 完整的类型定义：`GitFileStatus`、`StagedFile`、`GitStatus`
+- **相关代码**：`src/utils/git.ts`
+- **测试覆盖**：`tests/utils/git.test.ts`（21 个测试用例，使用临时 Git 仓库）
 
 #### 4. 配置验证不足
 
@@ -207,9 +192,9 @@
 已完成 ✅：
   └─ P0-1: 环境变量前缀过滤
   └─ P0-2: 移除 CLI 层类型转换逻辑
+  └─ P1-3: 封装 GitService
 
 功能扩展前（AI 提交生成前）：
-  └─ P1-3: 封装 GitService
   └─ P1-4: 实现配置验证器
   └─ P1-5: 定义错误类型层次
 
@@ -233,11 +218,11 @@ P0 问题已修复：
 
 创建独立 PR 解决 P1 问题：
 
-1. **PR1: Git 操作封装**
+1. **PR1: Git 操作封装** ✅ 已完成
 
-   - 创建 `src/utils/git.ts`
-   - 迁移现有 Git 调用
-   - 编写单元测试
+   - ✅ 创建 `src/utils/git.ts`
+   - ✅ 迁移现有 Git 调用
+   - ✅ 编写单元测试（21 个测试用例）
 
 2. **PR2: 配置验证器**
 
