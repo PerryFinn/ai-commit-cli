@@ -179,7 +179,6 @@
       providers/
         base.ts          # LLMProvider 接口定义
         openai.ts        # OpenAIProvider 实现
-        ollama.ts        # OllamaProvider 实现
         gemini.ts        # GeminiProvider 实现
         dify.ts          # DifyProvider 实现
         factory.ts       # Provider 工厂，根据配置创建对应实例

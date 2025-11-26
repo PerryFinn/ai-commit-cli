@@ -9,7 +9,6 @@
  */
 export const LLMProvider = {
   OPEN_AI: "OPEN_AI",
-  OLLAMA: "OLLAMA",
   GEMINI: "GEMINI",
   DIFY: "DIFY"
 } as const;
@@ -32,7 +31,7 @@ export type Language = (typeof Language)[keyof typeof Language];
 export interface ConfigSchema {
   /** 模型 ID，例如 gpt-4o, qwen, llama3, gemini-pro 等 */
   AIGCM_MODEL_ID?: string;
-  /** LLM 提供商：OPEN_AI | OLLAMA | GEMINI | DIFY */
+  /** LLM 提供商：OPEN_AI | GEMINI | DIFY */
   AIGCM_LLM_PROVIDER?: LLMProvider;
   /** Dify 应用的 Auth ID（若使用 Dify 时必填） */
   AIGCM_DIFY_AUTH_ID?: string;

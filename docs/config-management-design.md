@@ -12,7 +12,7 @@
 ## 配置项说明（共 11 项）
 
 - AIGCM_MODEL_ID: 模型 ID，例如 `gpt-4o`, `llama3`, `gemini-pro`。
-- AIGCM_LLM_PROVIDER: 枚举 `OPEN_AI|OLLAMA|GEMINI|DIFY`。
+- AIGCM_LLM_PROVIDER: 枚举 `OPEN_AI|GEMINI|DIFY`。
 - AIGCM_DIFY_AUTH_ID: 使用 Dify 时的应用 Auth ID。
 - AIGCM_PROMPT_MODULE: 提示词模块标识。
 - AIGCM_LANGUAGE: 枚举 `zh_CN|en`。

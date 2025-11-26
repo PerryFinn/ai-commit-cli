@@ -137,7 +137,6 @@ export async function generateCommitMessage(
 
 - `base.ts`：定义 `LLMProvider` 接口
 - `openai.ts`：OpenAI API 适配器
-- `ollama.ts`：Ollama 本地模型适配器
 - `gemini.ts`：Google Gemini 适配器
 - `dify.ts`：Dify 平台适配器
 - `factory.ts`：根据 `AIGCM_LLM_PROVIDER` 创建对应实例
@@ -195,7 +194,7 @@ Phase 2: Provider 层
   2.1 定义 LLMProvider 接口
   2.2 实现 OpenAI Provider（优先）
   2.3 实现 Provider 工厂
-  2.4 实现其他 Provider（Ollama、Gemini、Dify）
+  2.4 实现其他 Provider（Gemini、Dify）
 
 Phase 3: 服务层与 CLI
   3.1 实现 Prompt 构建逻辑
