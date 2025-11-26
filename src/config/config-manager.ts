@@ -1,4 +1,5 @@
 import { homedir } from "node:os";
+import { join } from "node:path";
 import Conf from "conf";
 import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configProperties } from "@/types/config";
 import { type EnvMap, findEnvFile, loadEnvFile } from "@/utils/env";
@@ -36,7 +37,8 @@ export class ConfigManager {
       projectName: "ai-commit-cli",
       // conf 期望的是一个“属性映射”的 schema，而非完整 JSON Schema，因此仅传入 properties 部分
       schema: configProperties,
-      cwd: homedir()
+      cwd: join(homedir(), ".aigcm"),
+      configName: "config.json"
     });
   }
 
