@@ -3,6 +3,7 @@ import mri from "mri";
 import pc from "picocolors";
 import { name as packageName } from "../../package.json";
 import { handleConfigGet, handleConfigList, handleConfigSet, handleConfigValidate } from "./commands/config";
+import { handleError } from "./error-handler";
 
 export type CLIResult = number;
 
@@ -75,7 +76,7 @@ async function handleConfig(subcommand: string | undefined, args: string[]): Pro
       }
     }
   } catch (error) {
-    log.error(pc.red((error as Error).message));
+    handleError(error);
     return 1;
   }
 }

@@ -55,46 +55,21 @@
 - **CLI 命令**：`aigcm config validate`
 - **测试覆盖**：`tests/config/config-validator.test.ts`（16 个测试用例）
 
-#### 5. 错误处理粗糙
+#### 5. 错误处理粗糙 ✅ 已修复
 
-- **现状**：CLI 层直接 `catch` 错误后输出，未区分错误类型
-- **问题**：难以对不同错误做差异化处理（如配置错误、网络错误、业务错误）
-- **建议**：定义错误类型层次结构
-
-  ```typescript
-  export class CLIError extends Error {
-    constructor(message: string, public readonly code: string) {
-      super(message);
-    }
-  }
-  export class ConfigError extends CLIError {
-    /* ... */
-  }
-  export class NetworkError extends CLIError {
-    /* ... */
-  }
-  export class ValidationError extends CLIError {
-    /* ... */
-  }
-  ```
-
-- **使用示例**：
-
-  ```typescript
-  try {
-    // ...
-  } catch (error) {
-    if (error instanceof ConfigError) {
-      log.error(pc.red(`配置错误: ${error.message}`));
-      log.info(pc.yellow('提示: 使用 aigcm config ls 查看当前配置'));
-    } else if (error instanceof NetworkError) {
-      log.error(pc.red(`网络错误: ${error.message}`));
-      log.info(pc.yellow('提示: 检查网络连接或 AIGCM_BASE_URL 配置'));
-    } else {
-      log.error(pc.red((error as Error).message));
-    }
-  }
-  ```
+- **原问题**：CLI 层直接 `catch` 错误后输出，未区分错误类型
+- **解决方案**：定义错误类型层次结构
+- **实现内容**：
+  - `CLIError`：基础错误类，包含 code 和 suggestion
+  - `ConfigError`：配置错误，包含 configKey
+  - `NetworkError`：网络错误，包含 statusCode
+  - `GitError`：Git 操作错误
+  - `ValidationError`：验证错误，包含 field
+  - `handleError()`：统一错误处理器，根据类型输出差异化信息
+- **相关代码**：
+  - `src/types/errors.ts`：错误类型定义
+  - `src/cli/error-handler.ts`：统一错误处理器
+- **测试覆盖**：`tests/types/errors.test.ts`（23 个测试用例）
 
 ### 🟢 低优先级（P2 - 优化项）
 
@@ -182,8 +157,6 @@
   └─ P0-2: 移除 CLI 层类型转换逻辑
   └─ P1-3: 封装 GitService
   └─ P1-4: 实现配置验证器
-
-功能扩展前（AI 提交生成前）：
   └─ P1-5: 定义错误类型层次
 
 功能开发中：
@@ -219,12 +192,12 @@ P0 问题已修复：
    - ✅ 添加 `config validate` 子命令
    - ✅ 编写单元测试（16 个测试用例）
 
-3. **PR3: 错误类型层次**
-   - 创建 `src/types/errors.ts`
-   - 定义错误类型层次
-   - 更新 CLI 层错误处理
-
-预计工作量：每个 PR 3-4 小时
+3. **PR3: 错误类型层次** ✅ 已完成
+   - ✅ 创建 `src/types/errors.ts`
+   - ✅ 定义错误类型层次（CLIError、ConfigError、NetworkError、GitError、ValidationError）
+   - ✅ 创建 `src/cli/error-handler.ts` 统一错误处理
+   - ✅ 更新 ConfigManager 使用新错误类型
+   - ✅ 编写单元测试（23 个测试用例）
 
 ### 第三阶段（AI 功能开发中）
 

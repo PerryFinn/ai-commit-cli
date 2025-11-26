@@ -2,6 +2,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import Conf from "conf";
 import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configProperties } from "@/types/config";
+import { ConfigError } from "@/types/errors";
 import { type EnvMap, findEnvFile, loadEnvFile } from "@/utils/env";
 
 type SourceTag = "cli" | ".env" | "config";
@@ -105,7 +106,7 @@ export class ConfigManager {
    */
   private assertValidKey(key: string): asserts key is ConfigKey {
     if (!CONFIG_KEYS.includes(key as ConfigKey)) {
-      throw new Error(`不支持的配置 key: ${key}`);
+      throw ConfigError.unsupportedKey(key);
     }
   }
 
@@ -116,12 +117,14 @@ export class ConfigManager {
     const prop = configProperties[key];
     if (!prop) return;
     const type = prop.type;
-    if (type === "boolean" && typeof value !== "boolean") throw new Error(`配置 ${key} 需要 boolean 类型`);
-    if (type === "number" && typeof value !== "number") throw new Error(`配置 ${key} 需要 number 类型`);
-    if (type === "string" && typeof value !== "string") throw new Error(`配置 ${key} 需要 string 类型`);
-    if (prop.enum && !prop.enum.includes(value)) throw new Error(`配置 ${key} 仅允许：${prop.enum.join(", ")}`);
+    if (type === "boolean" && typeof value !== "boolean") throw ConfigError.invalidValue(key, "boolean");
+    if (type === "number" && typeof value !== "number") throw ConfigError.invalidValue(key, "number");
+    if (type === "string" && typeof value !== "string") throw ConfigError.invalidValue(key, "string");
+    if (prop.enum && !prop.enum.includes(value)) {
+      throw new ConfigError(`配置 ${key} 仅允许：${prop.enum.join(", ")}`, undefined, { configKey: key });
+    }
     if (typeof prop.minimum === "number" && typeof value === "number" && value < prop.minimum) {
-      throw new Error(`配置 ${key} 不能小于 ${prop.minimum}`);
+      throw new ConfigError(`配置 ${key} 不能小于 ${prop.minimum}`, undefined, { configKey: key });
     }
   }
 
@@ -137,20 +140,20 @@ export class ConfigManager {
       case "boolean": {
         if (raw === "true" || raw === "1") return true as ConfigSchema[K];
         if (raw === "false" || raw === "0") return false as ConfigSchema[K];
-        throw new Error(`配置 ${key} 需要 boolean 类型`);
+        throw ConfigError.invalidValue(key, "boolean");
       }
       case "number": {
         const n = Number(raw);
-        if (Number.isNaN(n)) throw new Error(`配置 ${key} 需要 number 类型`);
+        if (Number.isNaN(n)) throw ConfigError.invalidValue(key, "number");
         if (typeof prop.minimum === "number" && n < prop.minimum) {
-          throw new Error(`配置 ${key} 不能小于 ${prop.minimum}`);
+          throw new ConfigError(`配置 ${key} 不能小于 ${prop.minimum}`, undefined, { configKey: key });
         }
         return n as ConfigSchema[K];
       }
       default: {
         // 对于字符串类型，需要验证 enum
         if (prop.enum && !prop.enum.includes(raw)) {
-          throw new Error(`配置 ${key} 仅允许：${prop.enum.join(", ")}`);
+          throw new ConfigError(`配置 ${key} 仅允许：${prop.enum.join(", ")}`, undefined, { configKey: key });
         }
         return raw as ConfigSchema[K];
       }

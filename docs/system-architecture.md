@@ -190,10 +190,10 @@ export async function generateCommitMessage(
 ### 实施顺序
 
 ```text
-Phase 1: 基础设施准备
+Phase 1: 基础设施准备 ✅ 已完成
   1.1 封装 Git 工具类（utils/git.ts） ✅ 已完成
   1.2 实现配置验证器 ✅ 已完成
-  1.3 定义错误类型
+  1.3 定义错误类型 ✅ 已完成
 
 Phase 2: Provider 层
   2.1 定义 LLMProvider 接口
