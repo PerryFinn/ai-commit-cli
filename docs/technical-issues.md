@@ -11,42 +11,23 @@
 
 ## 已识别的设计问题与改进建议
 
-### 🔴 高优先级（P0 - 需要在功能扩展前解决）
+### ✅ 高优先级（P0 - 已解决）
 
-#### 1. 环境变量过滤缺失
+#### 1. 环境变量过滤缺失 ✅ 已修复
 
-- **现状**：`cli/commands/config.ts` 中的 `normalizeCliEnv` 只过滤 `undefined` 值，未过滤 `AIGCM_` 前缀
-- **问题**：将整个 `process.env` 传入 ConfigManager，可能导致意外行为
-- **建议**：在 `normalizeCliEnv` 中添加前缀过滤逻辑
+- **原问题**：`cli/commands/config.ts` 中的 `normalizeCliEnv` 只过滤 `undefined` 值，未过滤 `AIGCM_` 前缀
+- **解决方案**：在 `normalizeCliEnv` 中添加了前缀过滤逻辑
+- **相关代码**：`src/cli/commands/config.ts` 第 80-88 行
+- **测试覆盖**：`tests/cli/commands/config.test.ts` 中新增了 "应该过滤非 AIGCM_ 前缀的环境变量" 测试
 
-  ```typescript
-  const normalizeCliEnv = (
-    env: Record<string, string | undefined>
-  ): Record<string, string> => {
-    const out: Record<string, string> = {};
-    for (const [k, v] of Object.entries(env)) {
-      if (k.startsWith('AIGCM_') && typeof v === 'string') out[k] = v;
-    }
-    return out;
-  };
-  ```
+#### 2. 类型转换逻辑重复 ✅ 已修复
 
-#### 2. 类型转换逻辑重复
-
-- **现状**：`config.ts` 的 `coerceValueForKey` 与 `ConfigManager` 的 `castValue` 逻辑重复
-- **问题**：违反 DRY 原则，增加维护成本，CLI 层不应关心类型转换细节
-- **建议**：移除 CLI 层的类型转换，统一由 ConfigManager 处理
-
-  ```typescript
-  // CLI 层直接传递字符串
-  manager.set(key, value); // value 是 string
-  // ConfigManager 内部负责类型转换与校验
-  ```
-
-- **实现步骤**：
+- **原问题**：`config.ts` 的 `coerceValueForKey` 与 `ConfigManager` 的 `castValue` 逻辑重复
+- **解决方案**：
   1. 修改 `ConfigManager.set` 方法，支持接收 `string` 类型并自动转换
-  2. 移除 `cli/commands/config.ts` 中的 `coerceValueForKey` 函数
-  3. 更新相关测试用例
+  2. 移除 CLI 层的 `coerceValueForKey` 函数，CLI 直接传递字符串
+- **相关代码**：`src/config/config-manager.ts` 第 61-67 行
+- **测试覆盖**：`tests/config/config-manager.test.ts` 中 "set 方法字符串转换" 测试套件
 
 ### 🟡 中优先级（P1 - 功能扩展时需考虑）
 
@@ -223,7 +204,7 @@
 ## 改进优先级总结
 
 ```text
-立即修复（下一个 PR）：
+已完成 ✅：
   └─ P0-1: 环境变量前缀过滤
   └─ P0-2: 移除 CLI 层类型转换逻辑
 
@@ -239,16 +220,14 @@
 
 ## 实施建议
 
-### 第一阶段（立即执行）
+### 第一阶段 ✅ 已完成
 
-创建 PR 修复 P0 问题：
+P0 问题已修复：
 
-1. 修改 `cli/commands/config.ts` 的 `normalizeCliEnv` 添加前缀过滤
-2. 重构 `ConfigManager.set` 支持字符串输入并自动转换
-3. 移除 `coerceValueForKey` 函数
-4. 更新相关测试确保覆盖率不降低
-
-预计工作量：2-3 小时
+1. ✅ 修改 `cli/commands/config.ts` 的 `normalizeCliEnv` 添加前缀过滤
+2. ✅ 重构 `ConfigManager.set` 支持字符串输入并自动转换
+3. ✅ 移除 `coerceValueForKey` 函数
+4. ✅ 更新相关测试确保覆盖率不降低
 
 ### 第二阶段（AI 功能开发前）
 
@@ -291,4 +270,4 @@
 
 ---
 
-最后更新：2025-10-08
+最后更新：2025-11-26

@@ -5,7 +5,7 @@
 本系统提供统一的配置管理能力，采用三层优先级合并策略：命令行环境变量 > 本地 .env > 配置文件（conf 持久化）。
 
 - 配置定义：`src/types/config.ts` 提供 TypeScript 类型与 JSON Schema。
-- 持久化与校验：`src/config/ConfigManager.ts` 基于 `conf` 存储，使用 JSON Schema 做基本校验。
+- 持久化与校验：`src/config/config-manager.ts` 基于 `conf` 存储，使用 JSON Schema 做基本校验。
 - 环境处理：`src/utils/env.ts` 提供 `.env` 查找与轻量解析、环境合并。
 - CLI 命令：`src/cli/commands/config.ts` 实现 `set/get/ls`，`src/cli/parser.ts` 提供子命令解析与路由。
 
@@ -58,7 +58,7 @@ aigcm config ls
 ## 文件结构
 
 - `src/types/config.ts`：配置枚举、接口与 JSON Schema。
-- `src/config/ConfigManager.ts`：封装三层优先级、类型校验、读写接口。
+- `src/config/config-manager.ts`：封装三层优先级、类型校验、读写接口。
 - `src/utils/env.ts`：`.env` 查找、解析与合并工具。
 - `src/cli/commands/config.ts`：`set/get/ls` 命令实现。
 - `src/cli/parser.ts`：顶层命令解析与路由。
