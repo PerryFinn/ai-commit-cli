@@ -7,9 +7,9 @@ const rootDir = path.dirname(fileURLToPath(new URL("./", import.meta.url)));
 const srcDir = path.join(rootDir, "src");
 
 // 生成 changeset 相关的构建配置
-const genChangesetConfig = (): Omit<UserConfig, "config" | "filter"> => {
+const genChangesetConfig = (): UserConfig | null => {
   const enableChangesetBuild = process.env.ENABLE_CHANGESET_BUILD === "true";
-  if (!enableChangesetBuild) return {};
+  if (!enableChangesetBuild) return null;
 
   return {
     entry: {
@@ -24,7 +24,7 @@ const genChangesetConfig = (): Omit<UserConfig, "config" | "filter"> => {
   };
 };
 
-export default defineConfig([
+const configs: UserConfig[] = [
   {
     entry: {
       index: "src/index.ts"
@@ -38,12 +38,18 @@ export default defineConfig([
     target: "es2020",
     alias: {
       "@": srcDir
-    }
+    },
     // 把 js 和 cjs 格式的 dts 扩展名都固定成 .d.ts（防止产出 .d.cts和 .d.ts 两种类型文件）
-    // outExtensions: ({ format }) => ({
-    //   js: format === "cjs" ? ".cjs" : ".js",
-    //   dts: ".d.ts"
-    // })
-  },
-  genChangesetConfig()
-]);
+    outExtensions: ({ format }) => ({
+      js: format === "cjs" ? ".cjs" : ".js",
+      dts: format === "cjs" ? ".d.cts" : ".d.ts"
+    })
+  }
+];
+
+const changesetConfig = genChangesetConfig();
+if (changesetConfig) {
+  configs.push(changesetConfig);
+}
+
+export default defineConfig(configs);
