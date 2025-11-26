@@ -1,13 +1,13 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig, type Options } from "tsdown";
+import { defineConfig, type UserConfig } from "tsdown";
 
 // 计算项目根与 src 绝对路径，供 alias 使用（避免相对路径在打包时被当作裸模块）
 const rootDir = path.dirname(fileURLToPath(new URL("./", import.meta.url)));
 const srcDir = path.join(rootDir, "src");
 
 // 生成 changeset 相关的构建配置
-const genChangesetConfig = (): Omit<Options, "config" | "filter"> => {
+const genChangesetConfig = (): Omit<UserConfig, "config" | "filter"> => {
   const enableChangesetBuild = process.env.ENABLE_CHANGESET_BUILD === "true";
   if (!enableChangesetBuild) return {};
 
