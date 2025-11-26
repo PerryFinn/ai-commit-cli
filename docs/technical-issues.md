@@ -42,30 +42,18 @@
 - **相关代码**：`src/utils/git.ts`
 - **测试覆盖**：`tests/utils/git.test.ts`（21 个测试用例，使用临时 Git 仓库）
 
-#### 4. 配置验证不足
+#### 4. 配置验证不足 ✅ 已修复
 
-- **现状**：ConfigManager 只做单字段类型校验
-- **问题**：无法验证跨配置项的业务规则（如使用 Dify 时必需 `AIGCM_DIFY_AUTH_ID`）
-- **建议**：引入配置验证器
-
-  ```typescript
-  export class ConfigValidator {
-    validate(config: Partial<ConfigSchema>): ValidationResult {
-      // 验证业务规则：如 provider=DIFY 时检查 authId
-      if (config.AIGCM_LLM_PROVIDER === 'DIFY' && !config.AIGCM_DIFY_AUTH_ID) {
-        return {
-          valid: false,
-          errors: ['使用 Dify 时必须配置 AIGCM_DIFY_AUTH_ID'],
-        };
-      }
-      return { valid: true };
-    }
-  }
-  ```
-
-- **应用时机**：
-  - 在 AI 提交生成命令初始化时调用验证
-  - 提供 `aigcm config validate` 子命令供用户主动检查
+- **原问题**：ConfigManager 只做单字段类型校验，无法验证跨配置项的业务规则
+- **解决方案**：引入 `ConfigValidator` 类
+- **实现内容**：
+  - 验证 Provider 依赖：Dify 需要 AUTH_ID，OpenAI/Gemini 需要 API_KEY
+  - 验证 AI 提交生成所需配置：Provider、Model ID 等
+  - 区分错误（阻止执行）和警告（建议配置）
+  - 提供修复建议
+- **相关代码**：`src/config/config-validator.ts`
+- **CLI 命令**：`aigcm config validate`
+- **测试覆盖**：`tests/config/config-validator.test.ts`（16 个测试用例）
 
 #### 5. 错误处理粗糙
 
@@ -193,9 +181,9 @@
   └─ P0-1: 环境变量前缀过滤
   └─ P0-2: 移除 CLI 层类型转换逻辑
   └─ P1-3: 封装 GitService
+  └─ P1-4: 实现配置验证器
 
 功能扩展前（AI 提交生成前）：
-  └─ P1-4: 实现配置验证器
   └─ P1-5: 定义错误类型层次
 
 功能开发中：
@@ -224,11 +212,12 @@ P0 问题已修复：
    - ✅ 迁移现有 Git 调用
    - ✅ 编写单元测试（21 个测试用例）
 
-2. **PR2: 配置验证器**
+2. **PR2: 配置验证器** ✅ 已完成
 
-   - 创建 `src/config/ConfigValidator.ts`
-   - 实现跨配置项验证规则
-   - 添加 `config validate` 子命令
+   - ✅ 创建 `src/config/config-validator.ts`
+   - ✅ 实现跨配置项验证规则
+   - ✅ 添加 `config validate` 子命令
+   - ✅ 编写单元测试（16 个测试用例）
 
 3. **PR3: 错误类型层次**
    - 创建 `src/types/errors.ts`

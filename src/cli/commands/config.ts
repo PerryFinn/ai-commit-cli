@@ -1,6 +1,7 @@
 import { log } from "@clack/prompts";
 import pc from "picocolors";
 import { ConfigManager } from "@/config/config-manager";
+import { ConfigValidator, ValidationContext } from "@/config/config-validator";
 import { CONFIG_KEYS, type ConfigKey } from "@/types/config";
 
 /**
@@ -70,6 +71,48 @@ export const handleConfigList = async (cliEnv: Record<string, string | undefined
   const widths = [28, 32, 10] as const;
   const lines = [header, ...rows].map((cols) => cols.map((c, i) => padRight(c, widths[i] ?? 20)).join(" ")).join("\n");
   log.info(`\n${lines}\n`);
+};
+
+/**
+ * config validate 命令处理
+ * 验证当前配置是否满足 AI 提交生成的要求
+ */
+export const handleConfigValidate = async (cliEnv: Record<string, string | undefined>): Promise<boolean> => {
+  const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
+  const allConfig = manager.getAll();
+  const config = ConfigValidator.extractValues(allConfig);
+
+  const validator = new ConfigValidator();
+  const result = validator.validate(config, ValidationContext.CommitGeneration);
+
+  // 显示错误
+  if (result.errors.length > 0) {
+    log.error(pc.red(pc.bold("配置验证失败：")));
+    for (const error of result.errors) {
+      log.error(pc.red(`  ✗ [${error.field}] ${error.message}`));
+      if (error.suggestion) {
+        log.info(pc.dim(`    提示: ${error.suggestion}`));
+      }
+    }
+  }
+
+  // 显示警告
+  if (result.warnings.length > 0) {
+    log.warn(pc.yellow(pc.bold("配置建议：")));
+    for (const warning of result.warnings) {
+      log.warn(pc.yellow(`  ⚠ [${warning.field}] ${warning.message}`));
+      if (warning.suggestion) {
+        log.info(pc.dim(`    提示: ${warning.suggestion}`));
+      }
+    }
+  }
+
+  // 显示结果摘要
+  if (!result.valid) {
+    log.info(pc.dim("\n运行 'aigcm config ls' 查看当前配置"));
+  }
+
+  return result.valid;
 };
 
 const padRight = (text: string, len: number): string => text + (text.length < len ? " ".repeat(len - text.length) : "");

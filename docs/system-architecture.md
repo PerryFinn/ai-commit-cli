@@ -192,7 +192,7 @@ export async function generateCommitMessage(
 ```text
 Phase 1: 基础设施准备
   1.1 封装 Git 工具类（utils/git.ts） ✅ 已完成
-  1.2 实现配置验证器
+  1.2 实现配置验证器 ✅ 已完成
   1.3 定义错误类型
 
 Phase 2: Provider 层

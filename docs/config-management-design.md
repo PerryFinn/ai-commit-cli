@@ -7,7 +7,8 @@
 - 配置定义：`src/types/config.ts` 提供 TypeScript 类型与 JSON Schema。
 - 持久化与校验：`src/config/config-manager.ts` 基于 `conf` 存储，使用 JSON Schema 做基本校验。
 - 环境处理：`src/utils/env.ts` 提供 `.env` 查找与轻量解析、环境合并。
-- CLI 命令：`src/cli/commands/config.ts` 实现 `set/get/ls`，`src/cli/parser.ts` 提供子命令解析与路由。
+- CLI 命令：`src/cli/commands/config.ts` 实现 `set/get/ls/validate`，`src/cli/parser.ts` 提供子命令解析与路由。
+- 配置验证：`src/config/config-validator.ts` 提供跨配置项的业务规则验证。
 
 ## 配置项说明（共 11 项）
 
@@ -53,14 +54,32 @@ aigcm config get AIGCM_MODEL_ID
 aigcm config ls
 ```
 
+- 验证：
+
+```bash
+aigcm config validate
+```
+
 当值来源于环境变量时，会显示来源标签 `[cli]` 或 `[.env]`。
+
+## 配置验证
+
+`config validate` 命令用于验证当前配置是否满足 AI 提交生成的要求：
+
+- 必须配置 `AIGCM_LLM_PROVIDER` 和 `AIGCM_MODEL_ID`
+- 使用 Dify 时必须配置 `AIGCM_DIFY_AUTH_ID`
+- 使用 OpenAI/Gemini 时必须配置 `AIGCM_API_KEY`
+- 建议配置 `AIGCM_LANGUAGE` 和 `AIGCM_MAX_TOKEN_INPUT`
+
+验证结果分为错误（阻止执行）和警告（建议配置）两级。
 
 ## 文件结构
 
 - `src/types/config.ts`：配置枚举、接口与 JSON Schema。
 - `src/config/config-manager.ts`：封装三层优先级、类型校验、读写接口。
+- `src/config/config-validator.ts`：跨配置项业务规则验证。
 - `src/utils/env.ts`：`.env` 查找、解析与合并工具。
-- `src/cli/commands/config.ts`：`set/get/ls` 命令实现。
+- `src/cli/commands/config.ts`：`set/get/ls/validate` 命令实现。
 - `src/cli/parser.ts`：顶层命令解析与路由。
 - `src/index.ts`：入口文件，委派至 parser。
 

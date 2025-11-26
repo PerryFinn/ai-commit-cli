@@ -2,7 +2,7 @@ import { intro, log, outro } from "@clack/prompts";
 import mri from "mri";
 import pc from "picocolors";
 import { name as packageName } from "../../package.json";
-import { handleConfigGet, handleConfigList, handleConfigSet } from "./commands/config";
+import { handleConfigGet, handleConfigList, handleConfigSet, handleConfigValidate } from "./commands/config";
 
 export type CLIResult = number;
 
@@ -64,6 +64,10 @@ async function handleConfig(subcommand: string | undefined, args: string[]): Pro
         await handleConfigList(processEnv);
         return 0;
       }
+      case "validate": {
+        const valid = await handleConfigValidate(processEnv);
+        return valid ? 0 : 1;
+      }
       default: {
         log.error(pc.red(`未知子命令：${subcommand ?? "<empty>"}`));
         printConfigHelp();
@@ -81,12 +85,13 @@ function printHelp(): void {
     `${pc.bold("用法:")} aigcm <command> [options]`,
     "",
     `${pc.bold("命令:")}`,
-    "  config         管理配置（set/get/ls）",
+    "  config         管理配置（set/get/ls/validate）",
     "",
     `${pc.bold("示例:")}`,
     "  aigcm config set AIGCM_MODEL_ID=gpt-4o",
     "  aigcm config get AIGCM_MODEL_ID",
-    "  aigcm config ls"
+    "  aigcm config ls",
+    "  aigcm config validate"
   ];
   log.info(`\n${lines.join("\n")}\n`);
 }
@@ -99,6 +104,7 @@ function printConfigHelp(): void {
     "  set KEY=value [... ]     设置配置项",
     "  get KEY                  查询配置项",
     "  ls                       列出所有配置",
+    "  validate                 验证配置完整性",
     ""
   ];
   log.info(`\n${lines.join("\n")}\n`);
