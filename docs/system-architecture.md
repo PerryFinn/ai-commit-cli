@@ -18,19 +18,22 @@ graph TB
         Index["src/index.ts<br/>CLI 入口"]
         Parser["cli/parser.ts<br/>命令解析"]
         ConfigCmd["cli/commands/config.ts<br/>配置命令"]
-        CommitCmd["未来：cli/commands/commit.ts<br/>提交命令"]
+        CommitCmd["cli/commands/commit.ts<br/>提交命令 ✅"]
     end
 
     subgraph Services["服务层 (Services)"]
-        CommitGen["未来：services/commit.ts<br/>提交信息生成"]
-        Providers["未来：services/providers/*<br/>LLM 适配器工厂"]
+        CommitGen["services/commit.ts<br/>提交信息生成 ✅"]
+        PromptBuilder["services/prompt.ts<br/>Prompt 构建 ✅"]
+        Providers["services/providers/*<br/>LLM 适配器工厂 ✅"]
     end
 
     subgraph Infrastructure["基础设施层 (Infrastructure)"]
         Config["config/ConfigManager<br/>配置管理"]
+        ConfigValidator["config/ConfigValidator<br/>配置验证 ✅"]
         Env["utils/env<br/>环境变量解析"]
-        Git["utils/git<br/>Git 操作"]
+        Git["utils/git<br/>Git 操作 ✅"]
         Utils["utils/*<br/>通用工具"]
+        Errors["types/errors<br/>错误类型 ✅"]
     end
 
     subgraph Types["类型定义 (Types)"]
@@ -39,16 +42,18 @@ graph TB
 
     Index --> Parser
     Parser --> ConfigCmd
-    Parser -.未来.-> CommitCmd
+    Parser --> CommitCmd
     ConfigCmd --> Config
-    CommitCmd -.未来.-> CommitGen
-    CommitGen -.未来.-> Providers
-    CommitGen -.未来.-> Git
-    CommitGen -.未来.-> Config
+    CommitCmd --> CommitGen
+    CommitGen --> PromptBuilder
+    CommitGen --> Providers
+    CommitGen --> Git
+    CommitGen --> Config
+    CommitGen --> ConfigValidator
     Config --> Env
     Config --> ConfigTypes
     Env --> Git
-    Providers -.未来.-> ConfigTypes
+    Providers --> ConfigTypes
 
     style CLI fill:#e1f5ff
     style Services fill:#fff3e0
@@ -59,11 +64,11 @@ graph TB
 **说明**：
 
 - **CLI 层**：负责用户交互，解析命令行参数，调用服务层
-- **服务层**：封装业务逻辑（AI 提交生成），协调基础设施层
-- **基础设施层**：提供技术能力（配置、Git、环境变量、工具函数）
+- **服务层**：封装业务逻辑（AI 提交生成、Prompt 构建、LLM Provider），协调基础设施层
+- **基础设施层**：提供技术能力（配置、配置验证、Git、环境变量、错误处理、工具函数）
 - **类型定义层**：共享的 TypeScript 类型定义
 
-虚线表示未来扩展，实线表示当前已实现。
+✅ 表示已实现的模块。
 
 ## 核心模块职责
 
@@ -201,14 +206,14 @@ Phase 2: Provider 层 ✅ 已完成
   2.3 实现 Provider 工厂 ✅ 已完成
   2.4 实现其他 Provider（Gemini、Dify） ✅ 已完成
 
-Phase 3: 服务层与 CLI
-  3.1 实现 Prompt 构建逻辑
-  3.2 实现 generateCommitMessage 服务
-  3.3 实现 commit 命令
-  3.4 集成用户交互流程
+Phase 3: 服务层与 CLI ✅ 已完成
+  3.1 实现 Prompt 构建逻辑 ✅ 已完成
+  3.2 实现 generateCommitMessage 服务 ✅ 已完成
+  3.3 实现 commit 命令 ✅ 已完成
+  3.4 集成用户交互流程 ✅ 已完成
 
 Phase 4: 测试与完善
-  4.1 编写单元测试
+  4.1 编写单元测试（进行中）
   4.2 编写集成测试
   4.3 优化错误处理与重试逻辑
   4.4 完善文档与使用示例

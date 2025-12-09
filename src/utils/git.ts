@@ -11,12 +11,19 @@ interface GitExecResult {
  * Git 文件状态
  */
 export const GitFileStatus = {
+  /** 新增 */
   Added: "A",
+  /** 修改 */
   Modified: "M",
+  /** 删除 */
   Deleted: "D",
+  /** 重命名 */
   Renamed: "R",
+  /** 拷贝 */
   Copied: "C",
+  /** 未跟踪 */
   Untracked: "?",
+  /** 忽略 */
   Ignored: "!"
 } as const;
 

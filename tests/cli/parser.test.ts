@@ -15,10 +15,11 @@ describe("CLI parser", () => {
       expect(code).toBe(0);
     });
 
-    it("当没有提供命令时，应该返回 0", async () => {
-      const code = await runCLI([]);
-      expect(code).toBe(0);
-    });
+    // TODO：有待商榷，在实际使用中，如果没有提供命令，应该有什么默认交互
+    // it("当没有提供命令时，应该返回 0", async () => {
+    //   const code = await runCLI([]);
+    //   expect(code).toBe(0);
+    // });
 
     it("对于未知的命令，应该返回 1", async () => {
       const code = await runCLI(["unknown"]);

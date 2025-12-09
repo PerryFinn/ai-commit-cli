@@ -49,6 +49,7 @@
     "check:exports": "attw --pack . --profile=node16",
     "ci": "biome ci && bun run typecheck && bun run test && bun run build && bun run check:exports",
     "debug": "bun run build && AIGCM_LLM_PROVIDER=OPEN_AI node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_MAX_TOKEN_INPUT=1024 && node ./dist/index.cjs config ls",
+    "dev:cli": "bun run src/index.ts",
     "lint": "biome check . --no-errors-on-unmatched",
     "lint:fix": "biome check --write . --no-errors-on-unmatched",
     "precommit": "biome ci && bun run typecheck",
