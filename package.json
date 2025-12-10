@@ -38,7 +38,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "aigcm": "./dist/index.cjs"
+    "aigcm": "./dist/cli.cjs"
   },
   "files": [
     "dist",

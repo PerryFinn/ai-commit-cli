@@ -6,6 +6,24 @@ import { defineConfig, type UserConfig } from "tsdown";
 const rootDir = path.dirname(fileURLToPath(new URL("./", import.meta.url)));
 const srcDir = path.join(rootDir, "src");
 
+const commonConfig: UserConfig = {
+  format: ["cjs", "esm"],
+  dts: true,
+  sourcemap: true,
+  outDir: "dist",
+  clean: true,
+  minify: false,
+  target: "es2020",
+  alias: {
+    "@": srcDir
+  },
+  // 把 js 和 cjs 格式的 dts 扩展名都固定成 .d.ts（防止产出 .d.cts和 .d.ts 两种类型文件）
+  outExtensions: ({ format }) => ({
+    js: format === "cjs" ? ".cjs" : ".js",
+    dts: format === "cjs" ? ".d.cts" : ".d.ts"
+  })
+};
+
 // 生成 changeset 相关的构建配置
 const genChangesetConfig = (): UserConfig | null => {
   const enableChangesetBuild = process.env.ENABLE_CHANGESET_BUILD === "true";
@@ -24,32 +42,28 @@ const genChangesetConfig = (): UserConfig | null => {
   };
 };
 
-const configs: UserConfig[] = [
-  {
+const genPackageConfig = (): UserConfig => {
+  return {
+    ...commonConfig,
     entry: {
       index: "src/index.ts"
-    },
-    format: ["cjs", "esm"],
-    dts: true,
-    sourcemap: true,
-    outDir: "dist",
-    clean: true,
-    minify: false,
-    target: "es2020",
-    alias: {
-      "@": srcDir
-    },
-    // 把 js 和 cjs 格式的 dts 扩展名都固定成 .d.ts（防止产出 .d.cts和 .d.ts 两种类型文件）
-    outExtensions: ({ format }) => ({
-      js: format === "cjs" ? ".cjs" : ".js",
-      dts: format === "cjs" ? ".d.cts" : ".d.ts"
-    })
-  }
-];
+    }
+  };
+};
 
-const changesetConfig = genChangesetConfig();
-if (changesetConfig) {
-  configs.push(changesetConfig);
-}
+const genCLIConfig = (): UserConfig => {
+  return {
+    ...commonConfig,
+    entry: {
+      cli: "src/index.ts"
+    },
+    format: ["cjs"],
+    dts: false,
+    banner: {
+      js: `#!/usr/bin/env node`
+    },
+    platform: "node"
+  };
+};
 
-export default defineConfig(configs);
+export default defineConfig([genChangesetConfig(), genPackageConfig(), genCLIConfig()].filter(Boolean) as UserConfig[]);
