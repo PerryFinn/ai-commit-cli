@@ -1,4 +1,5 @@
 import { log } from "@clack/prompts";
+import { Table } from "console-table-printer";
 import pc from "picocolors";
 import { ConfigManager } from "@/config/config-manager";
 import { ConfigValidator, ValidationContext } from "@/config/config-validator";
@@ -60,17 +61,22 @@ export const handleConfigList = async (cliEnv: Record<string, string | undefined
     const entry = all[key];
     const value = entry?.value;
     const source = entry?.source;
-    return [
-      pc.bold(key),
-      typeof value === "undefined" ? pc.dim("<unset>") : pc.cyan(String(value)),
-      pc.dim(source ?? "-")
-    ];
+    return {
+      key: pc.bold(key),
+      value: typeof value === "undefined" ? pc.dim("<unset>") : pc.cyan(String(value)),
+      source: pc.dim(source ?? "-")
+    };
   });
-  // 简单表格输出
-  const header = [pc.bold("KEY"), pc.bold("VALUE"), pc.bold("SOURCE")];
-  const widths = [28, 32, 10] as const;
-  const lines = [header, ...rows].map((cols) => cols.map((c, i) => padRight(c, widths[i] ?? 20)).join(" ")).join("\n");
-  log.info(`\n${lines}\n`);
+  const table = new Table({
+    columns: [
+      { name: "key", title: "KEY", alignment: "left" },
+      { name: "value", title: "VALUE", alignment: "left" },
+      { name: "source", title: "SOURCE", alignment: "left" },
+      { name: "desc", title: "DESCRIPTION", alignment: "left" }
+    ]
+  });
+  table.addRows(rows);
+  log.info(table.render());
 };
 
 /**
@@ -114,8 +120,6 @@ export const handleConfigValidate = async (cliEnv: Record<string, string | undef
 
   return result.valid;
 };
-
-const padRight = (text: string, len: number): string => text + (text.length < len ? " ".repeat(len - text.length) : "");
 
 /**
  * 规范化 CLI 环境变量，仅保留 AIGCM_ 前缀的变量
