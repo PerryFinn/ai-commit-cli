@@ -3,6 +3,12 @@
  * 负责根据配置和 Git diff 构建发送给 LLM 的提示词
  */
 
+import conventionalConfig from "@commitlint/config-conventional";
+import lint from "@commitlint/lint";
+import type { LintOptions } from "@commitlint/types";
+// @ts-expect-error - No declaration file found
+import createConventionalPreset from "conventional-changelog-conventionalcommits";
+
 import type { ConfigSchema, Language } from "@/types/config";
 import type { StagedFile } from "@/utils/git";
 
@@ -226,14 +232,40 @@ export function parseCommitMessages(response: string): string[] {
   return candidates;
 }
 
+const parserOptsPromise: Promise<LintOptions["parserOpts"]> = (async () => {
+  try {
+    const preset = await createConventionalPreset();
+    return (preset as { parserOpts?: LintOptions["parserOpts"] }).parserOpts;
+  } catch {
+    return undefined;
+  }
+})();
+
+const lintOptionsPromise: Promise<LintOptions> = (async () => ({
+  parserOpts: await parserOptsPromise,
+  defaultIgnores: false
+}))();
+
+async function getLintOptions(): Promise<LintOptions> {
+  return lintOptionsPromise;
+}
+
 /**
  * 验证提交信息是否符合 Conventional Commits 规范
  */
-export function isValidConventionalCommit(message: string): boolean {
-  const firstLine = message.split("\n")[0] ?? "";
-  // 支持带 scope 和不带 scope 的格式
-  const pattern = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?:\s*.+$/i;
-  return pattern.test(firstLine);
+export async function isValidConventionalCommit(message: string): Promise<boolean> {
+  const firstLine = message.split("\n")[0]?.trim() ?? "";
+  if (!firstLine) {
+    return false;
+  }
+
+  try {
+    const lintOptions = await getLintOptions();
+    const result = await lint(firstLine, conventionalConfig.rules ?? {}, lintOptions);
+    return result.valid;
+  } catch {
+    return false;
+  }
 }
 
 /**

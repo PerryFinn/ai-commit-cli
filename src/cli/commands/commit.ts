@@ -180,10 +180,12 @@ function displayStagedFiles(files: StagedFile[]): void {
  */
 async function selectCommitMessage(candidates: string[]): Promise<string | null> {
   // 构建选项
+  const validity = await Promise.all(candidates.map((msg) => isValidConventionalCommit(msg)));
+
   const options = candidates.map((msg, index) => ({
     value: msg,
     label: `${index + 1}. ${formatCommitPreview(msg)}`,
-    hint: isValidConventionalCommit(msg) ? undefined : "非标准格式"
+    hint: validity[index] ? undefined : "非标准格式"
   }));
 
   // 添加自定义输入选项

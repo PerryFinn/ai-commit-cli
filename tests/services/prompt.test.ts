@@ -227,35 +227,35 @@ Add OAuth2 authentication support with:
   });
 
   describe("isValidConventionalCommit", () => {
-    it("应该验证带 scope 的提交信息", () => {
-      expect(isValidConventionalCommit("feat(cli): add command")).toBe(true);
-      expect(isValidConventionalCommit("fix(config): resolve issue")).toBe(true);
+    it("应该验证带 scope 的提交信息", async () => {
+      await expect(isValidConventionalCommit("feat(cli): add command")).resolves.toBe(true);
+      await expect(isValidConventionalCommit("fix(config): resolve issue")).resolves.toBe(true);
     });
 
-    it("应该验证不带 scope 的提交信息", () => {
-      expect(isValidConventionalCommit("feat: add feature")).toBe(true);
-      expect(isValidConventionalCommit("docs: update readme")).toBe(true);
+    it("应该验证不带 scope 的提交信息", async () => {
+      await expect(isValidConventionalCommit("feat: add feature")).resolves.toBe(true);
+      await expect(isValidConventionalCommit("docs: update readme")).resolves.toBe(true);
     });
 
-    it("应该验证所有 conventional commit 类型", () => {
+    it("应该验证所有 conventional commit 类型", async () => {
       const types = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "build", "ci", "chore", "revert"];
       for (const type of types) {
-        expect(isValidConventionalCommit(`${type}: description`)).toBe(true);
+        await expect(isValidConventionalCommit(`${type}: description`)).resolves.toBe(true);
       }
     });
 
-    it("应该验证多行提交信息（只检查第一行）", () => {
+    it("应该验证多行提交信息（只检查第一行）", async () => {
       const message = `feat(auth): add login
 
 This adds login functionality.`;
-      expect(isValidConventionalCommit(message)).toBe(true);
+      await expect(isValidConventionalCommit(message)).resolves.toBe(true);
     });
 
-    it("应该拒绝无效格式", () => {
-      expect(isValidConventionalCommit("invalid commit message")).toBe(false);
-      expect(isValidConventionalCommit("Add new feature")).toBe(false);
+    it("应该拒绝无效格式", async () => {
+      await expect(isValidConventionalCommit("invalid commit message")).resolves.toBe(false);
+      await expect(isValidConventionalCommit("Add new feature")).resolves.toBe(false);
       // expect(isValidConventionalCommit("feat: ")).toBe(false); // 空描述 // TODO: 暂时注释，这个函数应当使用 commitlint 来执行
-      expect(isValidConventionalCommit("unknown: message")).toBe(false); // 未知类型
+      await expect(isValidConventionalCommit("unknown: message")).resolves.toBe(false); // 未知类型
     });
   });
 
