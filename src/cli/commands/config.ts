@@ -3,7 +3,9 @@ import { Table } from "console-table-printer";
 import pc from "picocolors";
 import { ConfigManager } from "@/config/config-manager";
 import { ConfigValidator, ValidationContext } from "@/config/config-validator";
+import { DEFAULT_CONFIG } from "@/config/constants";
 import { CONFIG_KEYS, type ConfigKey } from "@/types/config";
+import { colorize } from "@/utils/color";
 
 /**
  * 将 "KEY=value" 形式解析为键值
@@ -22,7 +24,7 @@ const parseKeyValue = (pair: string): { key: ConfigKey; value: string } => {
  */
 export const handleConfigSet = async (args: string[], cliEnv: Record<string, string | undefined>): Promise<void> => {
   if (args.length === 0) {
-    throw new Error("请提供至少一个配置项，例如: config set AIGCM_MODEL_ID=gpt-4o");
+    throw new Error(`请提供至少一个配置项，例如: config set AIGCM_MODEL_ID=${DEFAULT_CONFIG.AIGCM_MODEL_ID}`);
   }
   const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
   for (const p of args) {
@@ -45,9 +47,9 @@ export const handleConfigGet = async (key: string, cliEnv: Record<string, string
   const manager = new ConfigManager({ cliEnv: normalizeCliEnv(cliEnv) });
   const { value, source } = manager.get(key as ConfigKey);
   if (typeof value === "undefined") {
-    log.info(pc.yellow(`${pc.bold(key)} 未设置`));
+    log.info(pc.yellow(`${pc.bold(key)} <unset>`));
   } else {
-    log.info(`${pc.bold(key)} = ${pc.cyan(String(value))} ${pc.dim(source ? `[${source}]` : "")}`);
+    log.info(`${pc.bold(key)} = ${colorize(value)} ${pc.dim(source ? `[${source}]` : "")}`);
   }
 };
 
@@ -63,14 +65,16 @@ export const handleConfigList = async (cliEnv: Record<string, string | undefined
     const source = entry?.source;
     return {
       key: pc.bold(key),
-      value: typeof value === "undefined" ? pc.dim("<unset>") : pc.cyan(String(value)),
-      source: pc.dim(source ?? "-")
+      value: typeof value === "undefined" ? pc.dim("<unset>") : colorize(value),
+      source: pc.dim(source ?? "-"),
+      // TODO: 添加描述
+      desc: "-"
     };
   });
   const table = new Table({
     columns: [
       { name: "key", title: "KEY", alignment: "left" },
-      { name: "value", title: "VALUE", alignment: "left" },
+      { name: "value", title: "VALUE", alignment: "left", maxLen: 20 },
       { name: "source", title: "SOURCE", alignment: "left" },
       { name: "desc", title: "DESCRIPTION", alignment: "left" }
     ]

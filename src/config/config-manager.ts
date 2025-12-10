@@ -83,8 +83,11 @@ export class ConfigManager {
   /**
    * 获取合并后的所有配置（已按优先级覆盖）以及来源
    */
-  public getAll(): Record<ConfigKey, ValueWithSource<unknown>> {
-    const result: Record<ConfigKey, ValueWithSource<unknown>> = {} as Record<ConfigKey, ValueWithSource<unknown>>;
+  public getAll(): Record<ConfigKey, ValueWithSource<string | number | boolean | undefined>> {
+    const result: Record<ConfigKey, ValueWithSource<string | number | boolean | undefined>> = {} as Record<
+      ConfigKey,
+      ValueWithSource<string | number | boolean | undefined>
+    >;
     for (const key of CONFIG_KEYS) {
       if (key in this.cliEnv) {
         result[key] = { value: this.castValue(key, this.cliEnv[key] as string), source: "cli" };
