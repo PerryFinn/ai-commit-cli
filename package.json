@@ -41,7 +41,8 @@
     "aigcm": "./dist/index.cjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsdown",
