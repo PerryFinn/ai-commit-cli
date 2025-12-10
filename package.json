@@ -54,7 +54,7 @@
     "lint": "biome check . --no-errors-on-unmatched",
     "lint:fix": "biome check --write . --no-errors-on-unmatched",
     "precommit": "biome ci && bun run typecheck",
-    "prepare": "husky",
+    "prepare": "bunx husky",
     "prepublishOnly": "bun run ci",
     "release": "changeset publish",
     "release:version": "changeset version",
