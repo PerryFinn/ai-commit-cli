@@ -1,5 +1,11 @@
 # @perryfinn/ai-commit-cli
 
+## 0.0.4
+
+### Patch Changes
+
+- 584e6fa: 修复运行命令无法找到文件执行的问题
+
 ## 0.0.3
 
 ### Patch Changes
