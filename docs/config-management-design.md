@@ -62,6 +62,11 @@ aigcm config validate
 
 当值来源于环境变量时，会显示来源标签 `[cli]` 或 `[.env]`。
 
+## 默认值
+
+- 通过 `conf` 的 `defaults` 提供内置默认值：`AIGCM_LLM_PROVIDER=OPEN_AI`、`AIGCM_LANGUAGE=zh_CN`。
+- 仍需显式设置 `AIGCM_MODEL_ID`、`AIGCM_API_KEY` 等必要参数。
+
 ## 配置验证
 
 `config validate` 命令用于验证当前配置是否满足 AI 提交生成的要求：
@@ -69,7 +74,7 @@ aigcm config validate
 - 必须配置 `AIGCM_LLM_PROVIDER` 和 `AIGCM_MODEL_ID`
 - 使用 Dify 时必须配置 `AIGCM_DIFY_AUTH_ID`
 - 使用 OpenAI/Gemini 时必须配置 `AIGCM_API_KEY`
-- 建议配置 `AIGCM_LANGUAGE` 和 `AIGCM_MAX_TOKEN_INPUT`
+- 建议配置 `AIGCM_MAX_TOKEN_INPUT`
 
 验证结果分为错误（阻止执行）和警告（建议配置）两级。
 

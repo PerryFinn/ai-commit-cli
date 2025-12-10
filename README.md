@@ -41,7 +41,7 @@ bun install
 bun run build
 ```
 
-设置与查看配置（AIGCM\_ 前缀）：
+配置（AIGCM\_ 前缀，默认 Provider=OPEN_AI，Language=zh_CN）：
 
 ```bash
 node ./dist/index.cjs config set AIGCM_MODEL_ID=gpt-4o AIGCM_ONE_LINE_COMMIT=true AIGCM_MAX_TOKEN_INPUT=1024

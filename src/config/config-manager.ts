@@ -4,6 +4,7 @@ import Conf from "conf";
 import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configProperties } from "@/types/config";
 import { ConfigError } from "@/types/errors";
 import { type EnvMap, findEnvFile, loadEnvFile } from "@/utils/env";
+import { DEFAULT_CONFIG } from "./constants";
 
 type SourceTag = "cli" | ".env" | "config";
 
@@ -39,7 +40,8 @@ export class ConfigManager {
       // conf 期望的是一个“属性映射”的 schema，而非完整 JSON Schema，因此仅传入 properties 部分
       schema: configProperties,
       cwd: join(homedir(), ".aigcm"),
-      configName: "config.json"
+      configName: "config",
+      defaults: DEFAULT_CONFIG
     });
   }
 
