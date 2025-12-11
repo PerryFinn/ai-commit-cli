@@ -20,13 +20,11 @@ export interface InternalValueWithSource<T> {
 export class InternalConfigManager {
   readonly #store: Conf<InternalConfigSchema>;
 
-  constructor(params?: { projectDir?: string }) {
-    const projectDir = params?.projectDir ?? join(homedir(), ".aigcm");
-
+  constructor() {
     this.#store = new Conf<InternalConfigSchema>({
       projectName: "ai-commit-cli",
       configName: "internal",
-      cwd: projectDir,
+      cwd: join(homedir(), ".aigcm"),
       defaults: INTERNAL_CONFIG_DEFAULTS,
       schema: internalConfigProperties
     });
