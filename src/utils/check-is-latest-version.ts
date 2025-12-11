@@ -1,7 +1,10 @@
 import { log } from "@clack/prompts";
 import { type ExecaError, execa } from "execa";
 import { bold, red, yellow } from "picocolors";
+import { InternalConfigManager } from "@/config/internal-config-manager";
 import { version as curPkgVersion, name as pkgName } from "../../package.json";
+
+export const VERSION_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
 export const getAICommitCLILatestVersion: () => Promise<string | undefined> = async () => {
   try {
@@ -15,8 +18,21 @@ export const getAICommitCLILatestVersion: () => Promise<string | undefined> = as
   }
 };
 
+const shouldSkipVersionCheck = (lastCheckedAt: number | undefined, now: number): boolean => {
+  if (lastCheckedAt === undefined) return false;
+  return now - lastCheckedAt < VERSION_CHECK_INTERVAL_MS;
+};
+
 export const checkLatestVersion = async (): Promise<void> => {
+  const internalConfigManager = new InternalConfigManager();
+  const lastCheckedAt = internalConfigManager.get("lastVersionCheckAt").value;
+  const now = Date.now();
+
+  if (shouldSkipVersionCheck(lastCheckedAt, now)) return;
+
   const latestVersion = await getAICommitCLILatestVersion();
+  internalConfigManager.set("lastVersionCheckAt", now);
+
   if (latestVersion && latestVersion !== curPkgVersion) {
     const installCmdPrompt = `npm install -g ${pkgName}@latest`;
     log.info(
