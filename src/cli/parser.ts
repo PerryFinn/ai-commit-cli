@@ -1,7 +1,7 @@
 import { intro, log, outro } from "@clack/prompts";
 import mri from "mri";
 import pc from "picocolors";
-import { name as packageName } from "../../package.json";
+import { name as packageName, version as packageVersion } from "../../package.json";
 import { type CommitOptions, handleCommit } from "./commands/commit";
 import { handleConfigGet, handleConfigList, handleConfigSet, handleConfigValidate } from "./commands/config";
 import { handleError } from "./error-handler";
@@ -26,13 +26,19 @@ export async function runCLI(argvInput: string[] = process.argv.slice(2)): Promi
         h: "help",
         a: "all",
         y: "yes",
-        d: "dry-run"
+        d: "dry-run",
+        v: "version"
       },
-      boolean: ["help", "all", "yes", "dry-run"],
+      boolean: ["help", "all", "yes", "dry-run", "version"],
       default: {}
     });
 
     const [command, subcommand, ...rest] = argv._ as string[];
+
+    if (argv.version) {
+      log.info(`${pc.bold(packageName)} v${packageVersion}`);
+      return 0;
+    }
 
     if (argv.help && !command) {
       printHelp();
@@ -125,6 +131,10 @@ function printHelp(): void {
     "  (default)      生成 AI 提交信息（等同于 commit）",
     "  commit         生成 AI 提交信息",
     "  config         管理配置（set/get/ls/validate）",
+    "",
+    `${pc.bold("全局选项:")}`,
+    "  -h, --help     显示帮助信息",
+    "  -v, --version  显示当前版本",
     "",
     `${pc.bold("Commit 选项:")}`,
     "  -a, --all      暂存所有变更后提交",
