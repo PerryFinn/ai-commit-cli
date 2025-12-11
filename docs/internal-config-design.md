@@ -344,21 +344,21 @@ export async function getOrCreateClientId(
    - 若存在但小于当前代码期望版本，则触发迁移；
 2. 根据版本差异调用迁移函数，例如：
 
-```ts
-private migrateIfNeeded(): void {
-  const currentVersion = this.#store.get("schemaVersion") ?? 1;
-  const targetVersion = 1; // 当前代码期望的版本
+   ```ts
+   private migrateIfNeeded(): void {
+     const currentVersion = this.#store.get("schemaVersion") ?? 1;
+     const targetVersion = 1; // 当前代码期望的版本
 
-  if (currentVersion === targetVersion) return;
+     if (currentVersion === targetVersion) return;
 
-  if (currentVersion < 1) {
-    // 预留：未来如有 v0 -> v1 的迁移逻辑
-  }
+     if (currentVersion < 1) {
+       // 预留：未来如有 v0 -> v1 的迁移逻辑
+     }
 
-  // 迁移完成后，更新 schemaVersion
-  this.#store.set("schemaVersion", targetVersion as never);
-}
-```
+     // 迁移完成后，更新 schemaVersion
+     this.#store.set("schemaVersion", targetVersion as never);
+   }
+   ```
 
 3. 迁移过程应具备以下特性：
    - **幂等**：重复执行不会产生错误结果；

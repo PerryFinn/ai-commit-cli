@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import path from "node:path";
+import { dirname, join } from "pathe";
 import { getRepoRoot } from "./git";
 
 /**
@@ -41,7 +41,7 @@ export const findEnvFile = (startDir: string): string | undefined => {
   // 1) 优先使用 Git 获取仓库根
   const repoRoot = getRepoRoot(startDir);
   if (repoRoot) {
-    const envAtRoot = path.join(repoRoot, ".env");
+    const envAtRoot = join(repoRoot, ".env");
     if (fs.existsSync(envAtRoot) && fs.statSync(envAtRoot).isFile()) {
       return envAtRoot;
     }
@@ -52,8 +52,8 @@ export const findEnvFile = (startDir: string): string | undefined => {
   let currentDir = startDir;
   const isRepoRoot = (dir: string): boolean => {
     try {
-      const hasGit = fs.existsSync(path.join(dir, ".git"));
-      const hasPkg = fs.existsSync(path.join(dir, "package.json"));
+      const hasGit = fs.existsSync(join(dir, ".git"));
+      const hasPkg = fs.existsSync(join(dir, "package.json"));
       return hasGit || hasPkg;
     } catch {
       return false;
@@ -61,12 +61,12 @@ export const findEnvFile = (startDir: string): string | undefined => {
   };
 
   for (let i = 0; i < 20; i++) {
-    const envPath = path.join(currentDir, ".env");
+    const envPath = join(currentDir, ".env");
     if (fs.existsSync(envPath) && fs.statSync(envPath).isFile()) {
       return envPath;
     }
     if (isRepoRoot(currentDir)) break; // 到达仓库根，停止继续向上
-    const parent = path.dirname(currentDir);
+    const parent = dirname(currentDir);
     if (parent === currentDir) break; // 已到文件系统根
     currentDir = parent;
   }

@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
-import path from "node:path";
 import { execaSync } from "execa";
+import path from "pathe";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { GitFileStatus, GitService, getRepoRoot } from "@/utils/git";
 

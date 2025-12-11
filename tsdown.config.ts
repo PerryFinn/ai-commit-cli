@@ -1,10 +1,10 @@
-import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { dirname, join } from "pathe";
 import { defineConfig, type UserConfig } from "tsdown";
 
 // 计算项目根与 src 绝对路径，供 alias 使用（避免相对路径在打包时被当作裸模块）
-const rootDir = path.dirname(fileURLToPath(new URL("./", import.meta.url)));
-const srcDir = path.join(rootDir, "src");
+const rootDir = dirname(fileURLToPath(new URL("./", import.meta.url)));
+const srcDir = join(rootDir, "src");
 
 const commonConfig: UserConfig = {
   format: ["cjs", "esm"],

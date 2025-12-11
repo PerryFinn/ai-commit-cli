@@ -1,6 +1,6 @@
 import { homedir } from "node:os";
-import { join } from "node:path";
 import Conf from "conf";
+import { join } from "pathe";
 import { CONFIG_KEYS, type ConfigKey, type ConfigSchema, configProperties } from "@/types/config";
 import { ConfigError } from "@/types/errors";
 import { type EnvMap, findEnvFile, loadEnvFile } from "@/utils/env";
