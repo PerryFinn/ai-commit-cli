@@ -6,6 +6,12 @@
 - 测试位于 `tests/`，目录结构与功能模块对应（例如 `tests/cli/`、`tests/config/`），统一命名为 `*.test.ts` 以便 Vitest 自动发现。
 - 构建产物输出到 `dist/`，不要提交；项目脚本与工具配置位于 `scripts/`、`docs/` 以及 `tsconfig.json`、`tsdown.config.ts`、`vitest.config.ts`、`bunfig.toml` 等根目录文件。
 
+### 设计文档
+
+- 配置系统设计：
+  - 用户配置：`docs/config-management-design.md`
+  - 内置配置：`docs/internal-config-design.md`
+
 ## 构建与开发命令
 
 - 使用 `bun install` 安装依赖；Bun 采用 `isolated` linker，目录结构类似 pnpm，其他包管工具亦可使用，但以 `bun.lock` 为准。
