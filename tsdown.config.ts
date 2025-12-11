@@ -12,7 +12,8 @@ const commonConfig: UserConfig = {
   sourcemap: true,
   outDir: "dist",
   clean: true,
-  minify: false,
+  // 开启 tsdown 内置压缩，移除注释与多余空白
+  minify: true,
   target: "es2020",
   alias: {
     "@": srcDir
