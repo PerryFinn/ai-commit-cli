@@ -91,7 +91,7 @@ export async function handleCommit(
   const s = spinner();
   s.start("正在生成提交信息...");
 
-  let candidates: string[];
+  let candidates: string[] = [];
   try {
     const commitService = new CommitService(config);
     const result = await commitService.generateCommitMessage({ candidateCount: 3 });
