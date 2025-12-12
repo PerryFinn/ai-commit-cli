@@ -1,18 +1,20 @@
 import { log } from "@clack/prompts";
 import Conf from "conf";
-import { execa } from "execa";
+import npmRegistryFetch from "npm-registry-fetch";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { InternalConfigManager } from "@/config/internal-config-manager";
 import { checkLatestVersion, VERSION_CHECK_INTERVAL_MS } from "@/utils/check-is-latest-version";
+import pkgJson from "../../package.json";
 
 vi.mock("conf", () => {
   const ConfMock = vi.fn();
   return { default: ConfMock };
 });
 
-vi.mock("execa", () => ({
-  execa: vi.fn()
-}));
+vi.mock("npm-registry-fetch", () => {
+  const fetchFn = Object.assign(vi.fn(), { json: vi.fn() });
+  return { default: fetchFn };
+});
 
 vi.mock("@clack/prompts", () => ({
   log: {
@@ -22,11 +24,13 @@ vi.mock("@clack/prompts", () => ({
 }));
 
 type ConfOptions = ConstructorParameters<typeof Conf>[0];
-type MockExeca = ReturnType<typeof vi.fn>;
 
 describe("checkLatestVersion", () => {
   const storage: Record<string, Record<string, unknown>> = {};
-  const execaMock = execa as unknown as MockExeca;
+  const registryFetchMock = npmRegistryFetch as unknown as ReturnType<typeof vi.fn> & {
+    json: ReturnType<typeof vi.fn>;
+  };
+  const registryJsonMock = registryFetchMock.json;
 
   const createMockConf = (options?: ConfOptions) => {
     const bucket = options?.configName ?? "config";
@@ -55,6 +59,8 @@ describe("checkLatestVersion", () => {
       delete storage[k];
     });
 
+    registryJsonMock.mockReset();
+
     (Conf as unknown as { mockImplementation: (impl: (options?: ConfOptions) => unknown) => void }).mockImplementation(
       (options?: ConfOptions) => createMockConf(options)
     );
@@ -65,11 +71,12 @@ describe("checkLatestVersion", () => {
   });
 
   it("超过检查间隔时应执行检查并写入时间戳", async () => {
-    execaMock.mockResolvedValue({ stdout: "9.9.9" } as unknown as Awaited<ReturnType<typeof execa>>);
+    registryJsonMock.mockResolvedValue({ "dist-tags": { latest: "9.9.9" } });
 
     await checkLatestVersion();
 
-    expect(execaMock).toHaveBeenCalledWith("npm", expect.arrayContaining(["view"]));
+    expect(registryJsonMock).toHaveBeenCalledTimes(1);
+    expect(registryJsonMock.mock.calls[0]?.[0]).toBe(pkgJson.name);
     expect(log.info).toHaveBeenCalledTimes(1);
 
     const mgr = new InternalConfigManager();
@@ -83,17 +90,17 @@ describe("checkLatestVersion", () => {
 
     await checkLatestVersion();
 
-    expect(execaMock).not.toHaveBeenCalled();
+    expect(registryJsonMock).not.toHaveBeenCalled();
     expect(mgr.get("lastVersionCheckAt").value).toBe(recent);
     expect(log.info).not.toHaveBeenCalled();
   });
 
   it("获取失败时也应写入最新检查时间", async () => {
-    execaMock.mockRejectedValue(new Error("network down"));
+    registryJsonMock.mockRejectedValue(new Error("network down"));
 
     await checkLatestVersion();
 
-    expect(execaMock).toHaveBeenCalledTimes(1);
+    expect(registryJsonMock).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledTimes(1);
 
     const mgr = new InternalConfigManager();

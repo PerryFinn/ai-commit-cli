@@ -1,5 +1,5 @@
 import { log } from "@clack/prompts";
-import { type ExecaError, execa } from "execa";
+import npmRegistryFetch from "npm-registry-fetch";
 import { bold, red, yellow } from "picocolors";
 import { InternalConfigManager } from "@/config/internal-config-manager";
 import { version as curPkgVersion, name as pkgName } from "../../package.json";
@@ -8,11 +8,20 @@ export const VERSION_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
 
 export const getAICommitCLILatestVersion: () => Promise<string | undefined> = async () => {
   try {
-    const { stdout } = await execa("npm", ["view", pkgName, "version"]);
-    return stdout;
-  } catch (_: unknown) {
-    const error = _ as ExecaError;
-    log.error(red(`获取 ${bold(pkgName)} 最新版本失败：\n${error.message}`));
+    const payload = (await npmRegistryFetch.json(pkgName)) as
+      | { "dist-tags"?: { latest?: string }; version?: string }
+      | undefined
+      | null;
+    const latestVersion = payload?.["dist-tags"]?.latest ?? payload?.version;
+
+    if (!latestVersion) {
+      log.error(red(`获取 ${bold(pkgName)} 最新版本失败：响应缺少版本信息`));
+    }
+
+    return latestVersion;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log.error(red(`获取 ${bold(pkgName)} 最新版本失败：\n${message}`));
     // TODO: 日志记录
     return undefined;
   }
