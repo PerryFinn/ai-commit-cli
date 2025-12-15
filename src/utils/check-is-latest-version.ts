@@ -1,14 +1,45 @@
 import { log } from "@clack/prompts";
+import Config from "@npmcli/config";
+import { definitions, flatten, shorthands } from "@npmcli/config/lib/definitions";
 import npmRegistryFetch from "npm-registry-fetch";
 import { bold, red, yellow } from "picocolors";
 import { InternalConfigManager } from "@/config/internal-config-manager";
 import { version as curPkgVersion, name as pkgName } from "../../package.json";
 
-export const VERSION_CHECK_INTERVAL_MS = 12 * 60 * 60 * 1000;
+export const VERSION_CHECK_INTERVAL_MS = 1000 * 60 * 60 * 12; // 12 小时检查一次
+const DEFAULT_NPM_REGISTRY = "https://registry.npmjs.org/";
 
+/**
+ * 读取合并后的 npm 配置并构造 registry fetch 参数，确保与用户本地 npm 行为一致。
+ */
+const buildFetchOptions = async (): Promise<npmRegistryFetch.Options> => {
+  try {
+    const config = new Config({
+      npmPath: process.cwd(),
+      definitions,
+      shorthands,
+      flatten,
+      cwd: process.cwd()
+    });
+
+    await config.load();
+
+    const flatOptions = config.flat as npmRegistryFetch.Options;
+    const registry = npmRegistryFetch.pickRegistry(pkgName, flatOptions);
+
+    return { ...flatOptions, registry };
+  } catch {
+    return { registry: DEFAULT_NPM_REGISTRY };
+  }
+};
+
+/**
+ * 从当前有效 registry 拉取 CLI 最新版本号。
+ */
 export const getAICommitCLILatestVersion: () => Promise<string | undefined> = async () => {
   try {
-    const payload = (await npmRegistryFetch.json(pkgName)) as
+    const fetchOptions = await buildFetchOptions();
+    const payload = (await npmRegistryFetch.json(pkgName, fetchOptions)) as
       | { "dist-tags"?: { latest?: string }; version?: string }
       | undefined
       | null;
@@ -27,11 +58,17 @@ export const getAICommitCLILatestVersion: () => Promise<string | undefined> = as
   }
 };
 
+/**
+ * 判断是否还在版本检查间隔内，避免过于频繁地访问 registry。
+ */
 const shouldSkipVersionCheck = (lastCheckedAt: number | undefined, now: number): boolean => {
   if (lastCheckedAt === undefined) return false;
   return now - lastCheckedAt < VERSION_CHECK_INTERVAL_MS;
 };
 
+/**
+ * 执行版本检查，提示用户升级，并记录上次检查时间。
+ */
 export const checkLatestVersion = async (): Promise<void> => {
   const internalConfigManager = new InternalConfigManager();
   const lastCheckedAt = internalConfigManager.get("lastVersionCheckAt").value;

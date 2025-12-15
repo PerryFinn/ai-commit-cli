@@ -1,4 +1,5 @@
 import { log } from "@clack/prompts";
+import Config from "@npmcli/config";
 import Conf from "conf";
 import npmRegistryFetch from "npm-registry-fetch";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -6,14 +7,33 @@ import { InternalConfigManager } from "@/config/internal-config-manager";
 import { checkLatestVersion, VERSION_CHECK_INTERVAL_MS } from "@/utils/check-is-latest-version";
 import pkgJson from "../../package.json";
 
+let mockedFlatOptions: Record<string, unknown> = {};
+let configLoadMock: ReturnType<typeof vi.fn>;
+
 vi.mock("conf", () => {
   const ConfMock = vi.fn();
   return { default: ConfMock };
 });
 
 vi.mock("npm-registry-fetch", () => {
-  const fetchFn = Object.assign(vi.fn(), { json: vi.fn() });
+  const fetchFn = Object.assign(vi.fn(), { json: vi.fn(), pickRegistry: vi.fn() });
   return { default: fetchFn };
+});
+
+vi.mock("@npmcli/config/lib/definitions", () => ({
+  definitions: {},
+  flatten: vi.fn((src: Record<string, unknown>, dest: Record<string, unknown>) => Object.assign(dest, src)),
+  shorthands: {}
+}));
+
+vi.mock("@npmcli/config", () => {
+  const ConfigMock = vi.fn(() => ({
+    load: configLoadMock,
+    get flat() {
+      return mockedFlatOptions;
+    }
+  }));
+  return { default: ConfigMock };
 });
 
 vi.mock("@clack/prompts", () => ({
@@ -26,11 +46,15 @@ vi.mock("@clack/prompts", () => ({
 type ConfOptions = ConstructorParameters<typeof Conf>[0];
 
 describe("checkLatestVersion", () => {
+  const defaultRegistry = "https://registry.npmjs.org/";
   const storage: Record<string, Record<string, unknown>> = {};
   const registryFetchMock = npmRegistryFetch as unknown as ReturnType<typeof vi.fn> & {
     json: ReturnType<typeof vi.fn>;
+    pickRegistry: ReturnType<typeof vi.fn>;
   };
   const registryJsonMock = registryFetchMock.json;
+  const pickRegistryMock = registryFetchMock.pickRegistry;
+  const ConfigMock = Config as unknown as ReturnType<typeof vi.fn>;
 
   const createMockConf = (options?: ConfOptions) => {
     const bucket = options?.configName ?? "config";
@@ -50,6 +74,10 @@ describe("checkLatestVersion", () => {
     } as unknown as Conf;
   };
 
+  const mockNpmConfig = (config: Record<string, unknown>) => {
+    mockedFlatOptions = config;
+  };
+
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2024-01-01T00:00:00.000Z"));
@@ -60,6 +88,18 @@ describe("checkLatestVersion", () => {
     });
 
     registryJsonMock.mockReset();
+    pickRegistryMock.mockReset();
+    ConfigMock.mockClear();
+    configLoadMock = vi.fn().mockResolvedValue(undefined);
+    mockNpmConfig({ registry: defaultRegistry });
+
+    pickRegistryMock.mockImplementation((_, opts?: Record<string, unknown>) => {
+      const scopedRegistry = opts?.["@perryfinn:registry"];
+      if (typeof scopedRegistry === "string") return scopedRegistry;
+      const registry = opts?.registry;
+      if (typeof registry === "string" && registry) return registry;
+      return defaultRegistry;
+    });
 
     (Conf as unknown as { mockImplementation: (impl: (options?: ConfOptions) => unknown) => void }).mockImplementation(
       (options?: ConfOptions) => createMockConf(options)
@@ -75,8 +115,12 @@ describe("checkLatestVersion", () => {
 
     await checkLatestVersion();
 
+    expect(ConfigMock).toHaveBeenCalledTimes(1);
+    expect(configLoadMock).toHaveBeenCalledTimes(1);
     expect(registryJsonMock).toHaveBeenCalledTimes(1);
     expect(registryJsonMock.mock.calls[0]?.[0]).toBe(pkgJson.name);
+    expect(registryJsonMock.mock.calls[0]?.[1]).toMatchObject({ registry: defaultRegistry });
+    expect(pickRegistryMock).toHaveBeenCalledWith(pkgJson.name, expect.objectContaining({ registry: defaultRegistry }));
     expect(log.info).toHaveBeenCalledTimes(1);
 
     const mgr = new InternalConfigManager();
@@ -91,6 +135,7 @@ describe("checkLatestVersion", () => {
     await checkLatestVersion();
 
     expect(registryJsonMock).not.toHaveBeenCalled();
+    expect(ConfigMock).not.toHaveBeenCalled();
     expect(mgr.get("lastVersionCheckAt").value).toBe(recent);
     expect(log.info).not.toHaveBeenCalled();
   });
@@ -102,8 +147,24 @@ describe("checkLatestVersion", () => {
 
     expect(registryJsonMock).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledTimes(1);
+    expect(ConfigMock).toHaveBeenCalledTimes(1);
+    expect(configLoadMock).toHaveBeenCalledTimes(1);
 
     const mgr = new InternalConfigManager();
     expect(mgr.get("lastVersionCheckAt").value).toBe(Date.now());
+  });
+
+  it("应使用 scope 对应的 registry", async () => {
+    const scopedRegistry = "https://registry.example.com/";
+    mockNpmConfig({ registry: defaultRegistry, "@perryfinn:registry": scopedRegistry });
+    registryJsonMock.mockResolvedValue({ "dist-tags": { latest: "9.9.9" } });
+
+    await checkLatestVersion();
+
+    expect(pickRegistryMock).toHaveBeenCalledWith(
+      pkgJson.name,
+      expect.objectContaining({ "@perryfinn:registry": scopedRegistry })
+    );
+    expect(registryJsonMock.mock.calls[0]?.[1]).toMatchObject({ registry: scopedRegistry });
   });
 });
