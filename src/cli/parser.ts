@@ -148,7 +148,7 @@ function printHelp(): void {
     "  aigcm config set AIGCM_MODEL_ID=gpt-4o",
     "  aigcm config ls"
   ];
-  log.info(`\n${lines.join("\n")}\n`);
+  log.info(`${lines.join("\n")}\n`);
 }
 
 function printCommitHelp(): void {

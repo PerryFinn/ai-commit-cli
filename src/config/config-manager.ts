@@ -125,12 +125,7 @@ export class ConfigManager {
     if (type === "boolean" && typeof value !== "boolean") throw ConfigError.invalidValue(key, "boolean");
     if (type === "number" && typeof value !== "number") throw ConfigError.invalidValue(key, "number");
     if (type === "string" && typeof value !== "string") throw ConfigError.invalidValue(key, "string");
-    if (prop.enum && !prop.enum.includes(value)) {
-      throw new ConfigError(`配置 ${key} 仅允许：${prop.enum.join(", ")}`, undefined, { configKey: key });
-    }
-    if (typeof prop.minimum === "number" && typeof value === "number" && value < prop.minimum) {
-      throw new ConfigError(`配置 ${key} 不能小于 ${prop.minimum}`, undefined, { configKey: key });
-    }
+    this.validateSchemaConstraints(key, value);
   }
 
   /**
@@ -143,25 +138,43 @@ export class ConfigManager {
 
     switch (prop.type) {
       case "boolean": {
-        if (raw === "true" || raw === "1") return true as ConfigSchema[K];
-        if (raw === "false" || raw === "0") return false as ConfigSchema[K];
+        if (raw === "true" || raw === "1") {
+          this.validateSchemaConstraints(key, true);
+          return true as ConfigSchema[K];
+        }
+        if (raw === "false" || raw === "0") {
+          this.validateSchemaConstraints(key, false);
+          return false as ConfigSchema[K];
+        }
         throw ConfigError.invalidValue(key, "boolean");
       }
       case "number": {
         const n = Number(raw);
         if (Number.isNaN(n)) throw ConfigError.invalidValue(key, "number");
-        if (typeof prop.minimum === "number" && n < prop.minimum) {
-          throw new ConfigError(`配置 ${key} 不能小于 ${prop.minimum}`, undefined, { configKey: key });
-        }
+        this.validateSchemaConstraints(key, n);
         return n as ConfigSchema[K];
       }
       default: {
-        // 对于字符串类型，需要验证 enum
-        if (prop.enum && !prop.enum.includes(raw)) {
-          throw new ConfigError(`配置 ${key} 仅允许：${prop.enum.join(", ")}`, undefined, { configKey: key });
-        }
+        this.validateSchemaConstraints(key, raw);
         return raw as ConfigSchema[K];
       }
+    }
+  }
+
+  /**
+   * 依据 schema 校验枚举与范围
+   */
+  private validateSchemaConstraints<K extends ConfigKey>(key: K, value: unknown): void {
+    const prop = configProperties[key];
+    if (!prop) return;
+    if (prop.enum && !prop.enum.includes(value)) {
+      throw new ConfigError(`配置 ${key} 仅允许：${prop.enum.join(", ")}`, undefined, { configKey: key });
+    }
+    if (typeof prop.minimum === "number" && typeof value === "number" && value < prop.minimum) {
+      throw new ConfigError(`配置 ${key} 不能小于 ${prop.minimum}`, undefined, { configKey: key });
+    }
+    if (typeof prop.maximum === "number" && typeof value === "number" && value > prop.maximum) {
+      throw new ConfigError(`配置 ${key} 不能大于 ${prop.maximum}`, undefined, { configKey: key });
     }
   }
 }

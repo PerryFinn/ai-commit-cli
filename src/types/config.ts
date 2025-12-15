@@ -93,8 +93,8 @@ export const configProperties: Record<ConfigKey, JSONSchemaProperty> = {
   AIGCM_LANGUAGE: { type: "string", enum: Object.values(Language) },
   AIGCM_ONE_LINE_COMMIT: { type: "boolean" },
   AIGCM_OMIT_COMMIT_SCOPE: { type: "boolean" },
-  AIGCM_MAX_TOKEN_INPUT: { type: "number", minimum: 0 },
-  AIGCM_MAX_TOKEN_OUTPUT: { type: "number", minimum: 0 },
+  AIGCM_MAX_TOKEN_INPUT: { type: "number", minimum: 0, maximum: 30 * 1024 },
+  AIGCM_MAX_TOKEN_OUTPUT: { type: "number", minimum: 0, maximum: 272 * 1024 },
   AIGCM_API_KEY: { type: "string" },
   AIGCM_BASE_URL: { type: "string" }
 } as const;

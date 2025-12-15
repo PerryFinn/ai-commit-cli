@@ -230,12 +230,9 @@ async function selectCommitMessage(candidates: string[]): Promise<string | null>
 /**
  * 格式化提交信息预览
  */
-function formatCommitPreview(message: string, maxLength: number = 60): string {
-  const firstLine = message.split("\n")[0] ?? "";
-  if (firstLine.length <= maxLength) {
-    return firstLine;
-  }
-  return `${firstLine.slice(0, maxLength - 3)}...`;
+function formatCommitPreview(message: string, maxLength = 200): string {
+  if (message.length <= maxLength) return message;
+  return `${message.slice(0, maxLength - 3)}...`;
 }
 
 /**
