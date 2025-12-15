@@ -272,6 +272,7 @@ export async function isValidConventionalCommit(message: string): Promise<boolea
  * 估算 prompt 的 token 数量（粗略估计）
  * 用于在发送前检查是否超出限制
  */
+// TODO: 使用 wasm 模块估算
 export function estimateTokenCount(text: string): number {
   // 粗略估算：英文约 4 字符 = 1 token，中文约 1.5 字符 = 1 token
   const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
