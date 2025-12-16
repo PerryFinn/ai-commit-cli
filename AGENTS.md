@@ -16,9 +16,9 @@
 
 - 使用 `bun install` 安装依赖；Bun 采用 `isolated` linker，目录结构类似 pnpm，其他包管工具亦可使用，但以 `bun.lock` 为准。
 - `bun run build`：通过 tsdown 构建 CLI，生成 CJS/ESM 及类型声明到 `dist/`。
-- `bun run lint`、`bun run lint:fix`、`bun run typecheck`：保证格式、lint 与类型检查通过，提交前务必执行。
+- `bun run lint`、`bun run lint:fix`、`bun run check:types`：保证格式、lint 与类型检查通过，提交前务必执行。
 - `bun run test`、`bun run test:watch`、`bun run test:coverage`：分别运行一次性测试、监听模式与覆盖率报告。
-- `bun run ci`：串行执行 lint、typecheck、构建与导出检查，是 PR 前置检查。
+- `bun run ci`：串行执行 lint、check:types、构建与导出检查，是 PR 前置检查。
 
 ## 编码规范与命名约定
 
@@ -46,7 +46,7 @@
 
 - 遵循 Conventional Commits 规范，例如 `feat(cli): add dify provider`。
 - **所有 git commit 信息必须使用中文**，同时保持 Conventional Commits 结构。
-- `bun run precommit`（Biome CI + typecheck）由 Husky 在 `pre-commit` 钩子中触发，提交前请确保通过。
+- `bun run precommit`（Biome CI + check:types）由 Husky 在 `pre-commit` 钩子中触发，提交前请确保通过。
 - PR 描述需包含行为变更摘要、手动测试步骤与关联 issue；若存在交互改动，请附上 CLI 输出或截图。
 - 面向用户的改动在合并前执行 `bunx changeset` 记录发布说明。
 

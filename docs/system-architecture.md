@@ -95,7 +95,7 @@ graph TB
 - `tests/config/ConfigManager.test.ts`：验证配置优先级、类型校验与来源标记等关键行为，并通过 mock `conf` 避免文件系统依赖。
 - `tests/cli/commands/config.test.ts`：确保 CLI 命令层正确调用 ConfigManager、处理参数与错误情况。
 - `tests/utils.test.ts`：覆盖基础工具函数的行为，保证公共函数稳定。
-- `package.json` 中的脚本 `bun run lint|typecheck|test|ci` 形成提交前质量门禁，结合 Husky/Commitlint 保证规范提交（详见仓库根部协作指南）。
+- `package.json` 中的脚本 `bun run lint|check:types|test|ci` 形成提交前质量门禁，结合 Husky/Commitlint 保证规范提交（详见仓库根部协作指南）。
 
 ## 运行时流程
 

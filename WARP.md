@@ -20,7 +20,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
   - 代码检查：
     - Lint：bun run lint
     - 自动修复：bun run lint:fix
-    - 类型检查：bun run typecheck
+    - 类型检查：bun run check:types
   - 测试（Vitest）：
     - 全量：bun run test
     - 单文件：bunx vitest tests/utils.test.ts
@@ -32,7 +32,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
     - 构建：bun run build（tsdown 打包 cjs/esm，产物到 dist，同时生成 d.ts 与 sourcemap）
     - 导出与类型正确性检查：bun run check:exports（attw）
   - CI 本地串跑（与 GitHub Actions 一致）：
-    - bun run ci（依次执行 ci、typecheck、test、build、check:exports）
+    - bun run ci（依次执行 ci、check:types、test、build、check:exports）
 
 - 版本与发布（Changesets）
 
