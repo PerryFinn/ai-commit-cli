@@ -42,8 +42,7 @@
   },
   "files": [
     "dist",
-    "README.md",
-    "tiktoken_bg.wasm"
+    "README.md"
   ],
   "scripts": {
     "build": "tsdown",
