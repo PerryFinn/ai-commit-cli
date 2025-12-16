@@ -63,7 +63,8 @@ const genCLIConfig = (): UserConfig => {
     banner: {
       js: `#!/usr/bin/env node`
     },
-    platform: "node"
+    platform: "node",
+    copy: [{ from: "./node_modules/@dqbd/tiktoken/lite/tiktoken_bg.wasm", to: "./dist/tiktoken_bg.wasm" }]
   };
 };
 

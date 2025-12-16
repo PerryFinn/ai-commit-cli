@@ -11,6 +11,7 @@ import createConventionalPreset from "conventional-changelog-conventionalcommits
 
 import type { ConfigSchema, Language } from "@/types/config";
 import type { StagedFile } from "@/utils/git";
+import { tokenCount } from "@/utils/prompt";
 
 /**
  * Prompt 构建上下文
@@ -269,22 +270,10 @@ export async function isValidConventionalCommit(message: string): Promise<boolea
 }
 
 /**
- * 估算 prompt 的 token 数量（粗略估计）
- * 用于在发送前检查是否超出限制
- */
-// TODO: 使用 wasm 模块估算
-export function estimateTokenCount(text: string): number {
-  // 粗略估算：英文约 4 字符 = 1 token，中文约 1.5 字符 = 1 token
-  const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-  const otherChars = text.length - chineseChars;
-  return Math.ceil(chineseChars / 1.5 + otherChars / 4);
-}
-
-/**
  * 截断 diff 内容以适应 token 限制
  */
 export function truncateDiff(diff: string, maxTokens: number): string {
-  const currentTokens = estimateTokenCount(diff);
+  const currentTokens = tokenCount(diff);
   if (currentTokens <= maxTokens) {
     return diff;
   }
@@ -298,7 +287,7 @@ export function truncateDiff(diff: string, maxTokens: number): string {
   const reserveTokens = 100; // 为截断提示预留
 
   for (const fileDiff of fileDiffs) {
-    const tokens = estimateTokenCount(fileDiff);
+    const tokens = tokenCount(fileDiff);
     if (usedTokens + tokens <= maxTokens - reserveTokens) {
       result.push(fileDiff);
       usedTokens += tokens;

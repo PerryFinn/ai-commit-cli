@@ -16,7 +16,6 @@ export {
 export {
   buildMultiplePrompt,
   buildPrompt,
-  estimateTokenCount,
   extractPromptOptions,
   isValidConventionalCommit,
   type PromptContext,

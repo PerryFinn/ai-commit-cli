@@ -6,10 +6,10 @@
 import type { ConfigSchema } from "@/types/config";
 import { GitError, ValidationError } from "@/types/errors";
 import { GitService, type GitStatus } from "@/utils/git";
+import { tokenCount } from "@/utils/prompt";
 import {
   buildMultiplePrompt,
   buildPrompt,
-  estimateTokenCount,
   extractPromptOptions,
   type PromptContext,
   parseCommitMessages,
@@ -131,7 +131,7 @@ export class CommitService {
     const promptOverhead = 1000; // 为 prompt 模板预留的 token
     const maxDiffTokens = maxInputTokens - promptOverhead;
 
-    if (estimateTokenCount(diff) > maxDiffTokens) {
+    if (tokenCount(diff) > maxDiffTokens) {
       diff = truncateDiff(diff, maxDiffTokens);
     }
 

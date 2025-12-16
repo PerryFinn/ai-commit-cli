@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   buildMultiplePrompt,
   buildPrompt,
-  estimateTokenCount,
   extractPromptOptions,
   isValidConventionalCommit,
   type PromptContext,
@@ -11,6 +10,7 @@ import {
   truncateDiff
 } from "@/services/prompt";
 import type { StagedFile } from "@/utils/git";
+import { tokenCount } from "@/utils/prompt";
 
 describe("Prompt 模块", () => {
   // 测试用的默认上下文
@@ -259,27 +259,28 @@ This adds login functionality.`;
     });
   });
 
-  describe("estimateTokenCount", () => {
+  describe("tokenCount", () => {
     it("应该估算纯英文文本的 token 数", () => {
       const text = "This is a test string with 40 characters!";
-      const tokens = estimateTokenCount(text);
-      // 约 40 / 4 = 10 tokens
+      const tokens = tokenCount(text);
+      console.log("tokens", tokens);
       expect(tokens).toBeGreaterThan(5);
-      expect(tokens).toBeLessThan(20);
+      expect(tokens).toBeLessThan(15);
     });
 
     it("应该估算包含中文的文本的 token 数", () => {
       const text = "这是一个测试字符串";
-      const tokens = estimateTokenCount(text);
-      // 约 9 / 1.5 = 6 tokens
+      const tokens = tokenCount(text);
+      console.log("tokens", tokens);
       expect(tokens).toBeGreaterThan(4);
       expect(tokens).toBeLessThan(10);
     });
 
     it("应该估算混合文本的 token 数", () => {
       const text = "Hello 世界";
-      const tokens = estimateTokenCount(text);
-      expect(tokens).toBeGreaterThan(1);
+      const tokens = tokenCount(text);
+      console.log("tokens", tokens);
+      expect(tokens).toBeGreaterThan(4);
     });
   });
 
