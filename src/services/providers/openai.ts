@@ -54,8 +54,10 @@ export class OpenAIProvider extends BaseProvider {
       model: this.config.modelId,
       messages: [{ role: "user", content: prompt }],
       max_tokens: options?.maxOutputTokens,
-      temperature: options?.temperature ?? 0.7
+      temperature: options?.temperature ?? 0.5
     };
+
+    //TODO 添加 log 记录 body
 
     try {
       const response = await this.fetchWithTimeout(
@@ -63,7 +65,8 @@ export class OpenAIProvider extends BaseProvider {
         {
           method: "POST",
           headers: this.buildHeaders({
-            Authorization: `Bearer ${this.config.apiKey}`
+            Authorization: `Bearer ${this.config.apiKey}`,
+            "Content-Type": "application/json"
           }),
           body: JSON.stringify(body)
         },
@@ -75,6 +78,7 @@ export class OpenAIProvider extends BaseProvider {
       }
 
       const data = (await response.json()) as OpenAIResponse;
+      // TODO 添加 log 记录 data
       return this.parseResponse(data);
     } catch (error) {
       if (error instanceof NetworkError) {
@@ -96,9 +100,11 @@ export class OpenAIProvider extends BaseProvider {
    */
   private parseResponse(data: OpenAIResponse): GenerateResult {
     const choice = data.choices[0];
-    if (!choice) {
+    if (!choice || !choice.message.content) {
       throw new NetworkError("OpenAI API 返回了空响应");
     }
+
+    console.log("choice :>>", choice);
 
     return {
       content: choice.message.content,
