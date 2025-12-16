@@ -4,12 +4,10 @@ import { runCLI } from "./cli/parser";
 import { checkLatestVersion } from "./utils/check-is-latest-version";
 
 async function main() {
-  try {
-    await checkLatestVersion();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.info(pc.yellow(`版本检查失败，已跳过：${message}`));
-  }
+  // 1. 检查最新版本
+  await checkLatestVersion();
+
+  // 2. 运行 CLI
   const code = await runCLI(process.argv.slice(2));
   process.exitCode = code;
 }

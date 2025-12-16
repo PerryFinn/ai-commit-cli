@@ -7,6 +7,7 @@ import { InternalConfigManager } from "@/config/internal-config-manager";
 import { version as curPkgVersion, name as pkgName } from "../../package.json";
 
 export const VERSION_CHECK_INTERVAL_MS = 1000 * 60 * 60 * 12; // 12 小时检查一次
+const VERSION_CHECK_TIMEOUT_MS = 3 * 1000; // 3s：够用又不拖慢 CLI
 const DEFAULT_NPM_REGISTRY = "https://registry.npmjs.org/";
 
 /**
@@ -37,25 +38,20 @@ const buildFetchOptions = async (): Promise<npmRegistryFetch.Options> => {
  * 从当前有效 registry 拉取 CLI 最新版本号。
  */
 export const getAICommitCLILatestVersion: () => Promise<string | undefined> = async () => {
-  try {
-    const fetchOptions = await buildFetchOptions();
-    const payload = (await npmRegistryFetch.json(pkgName, fetchOptions)) as
-      | { "dist-tags"?: { latest?: string }; version?: string }
-      | undefined
-      | null;
-    const latestVersion = payload?.["dist-tags"]?.latest ?? payload?.version;
+  const fetchOptions = await buildFetchOptions();
+  const payload = (await npmRegistryFetch.json(pkgName, {
+    ...fetchOptions,
+    timeout: typeof fetchOptions.timeout === "number" ? fetchOptions.timeout : VERSION_CHECK_TIMEOUT_MS,
+    // 版本检查没必要重试太久（可选）
+    retry: { retries: 1 }
+  })) as { "dist-tags"?: { latest?: string }; version?: string } | undefined | null;
+  const latestVersion = payload?.["dist-tags"]?.latest ?? payload?.version;
 
-    if (!latestVersion) {
-      log.error(red(`获取 ${bold(pkgName)} 最新版本失败：响应缺少版本信息`));
-    }
-
-    return latestVersion;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.error(red(`获取 ${bold(pkgName)} 最新版本失败：\n${message}`));
-    // TODO: 日志记录
-    return undefined;
+  if (!latestVersion) {
+    log.error(red(`获取 ${bold(pkgName)} 最新版本失败：响应缺少版本信息`));
   }
+
+  return latestVersion;
 };
 
 /**
@@ -71,20 +67,25 @@ const shouldSkipVersionCheck = (lastCheckedAt: number | undefined, now: number):
  */
 export const checkLatestVersion = async (): Promise<void> => {
   const internalConfigManager = new InternalConfigManager();
-  const lastCheckedAt = internalConfigManager.get("lastVersionCheckAt").value;
   const now = Date.now();
-
+  const lastCheckedAt = internalConfigManager.get("lastVersionCheckAt").value;
   if (shouldSkipVersionCheck(lastCheckedAt, now)) return;
+  try {
+    const latestVersion = await getAICommitCLILatestVersion();
 
-  const latestVersion = await getAICommitCLILatestVersion();
-  internalConfigManager.set("lastVersionCheckAt", now);
+    if (latestVersion && latestVersion !== curPkgVersion) {
+      const installCmdPrompt = `npm install -g ${pkgName}@${latestVersion}`;
+      log.info(
+        yellow(
+          `✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）快来更新，让 AI 帮你写得更顺手\n${installCmdPrompt}`
+        )
+      );
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
 
-  if (latestVersion && latestVersion !== curPkgVersion) {
-    const installCmdPrompt = `npm install -g ${pkgName}@latest`;
-    log.info(
-      yellow(
-        `✨ ${pkgName} 有点小进步（${curPkgVersion} → ${latestVersion}）。快来更新，让 AI 帮你写得更顺手：${installCmdPrompt}`
-      )
-    );
+    log.warn(yellow(`版本检查失败，已跳过：${message}`));
+  } finally {
+    internalConfigManager.set("lastVersionCheckAt", now);
   }
 };

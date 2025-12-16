@@ -44,7 +44,7 @@ export interface PromptOptions {
 const LANGUAGE_TEMPLATES = {
   zh_CN: {
     systemRole: "你是一个专业的 Git 提交信息生成助手。你需要根据代码变更生成符合 Conventional Commits 规范的提交信息。",
-    generateTask: "请根据以下代码变更生成提交信息：",
+    generateTask: "请根据以下代码变更生成中文的提交信息：",
     conventionalFormat: `
 提交信息必须遵循 Conventional Commits 规范：
 - 格式：<type>(<scope>): <description>
@@ -65,7 +65,7 @@ const LANGUAGE_TEMPLATES = {
   en: {
     systemRole:
       "You are a professional Git commit message generator. Generate commit messages following the Conventional Commits specification based on code changes.",
-    generateTask: "Generate a commit message based on the following code changes:",
+    generateTask: "Generate an English commit message based on the following code changes:",
     conventionalFormat: `
 The commit message must follow the Conventional Commits specification:
 - Format: <type>(<scope>): <description>

@@ -74,7 +74,7 @@ export const handleConfigList = async (cliEnv: Record<string, string | undefined
   const table = new Table({
     columns: [
       { name: "key", title: "KEY", alignment: "left" },
-      { name: "value", title: "VALUE", alignment: "left", maxLen: 20 },
+      { name: "value", title: "VALUE", alignment: "left", maxLen: 10 },
       { name: "source", title: "SOURCE", alignment: "left" },
       { name: "desc", title: "DESCRIPTION", alignment: "left" }
     ]

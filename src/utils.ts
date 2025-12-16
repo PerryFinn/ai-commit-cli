@@ -18,3 +18,5 @@ export const isValidConfigKey = (key: string): boolean => /^[A-Z_][A-Z0-9_]*$/.t
  * 统一错误消息生成
  */
 export const formatErrorMessage = (message: string): string => `Error: ${message}`;
+
+export const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

@@ -1,4 +1,4 @@
-import { execaSync } from "execa";
+import { execa, execaSync, type ResultPromise } from "execa";
 
 /**
  * Git 命令执行结果
@@ -70,7 +70,7 @@ export class GitService {
    */
   getRepoRoot(): string | undefined {
     try {
-      const result = this.execGit(["rev-parse", "--show-toplevel"]);
+      const result = this.execGitSync(["rev-parse", "--show-toplevel"]);
       return result.stdout.trim() || undefined;
     } catch {
       return undefined;
@@ -82,7 +82,7 @@ export class GitService {
    */
   isInsideRepo(): boolean {
     try {
-      this.execGit(["rev-parse", "--is-inside-work-tree"]);
+      this.execGitSync(["rev-parse", "--is-inside-work-tree"]);
       return true;
     } catch {
       return false;
@@ -94,7 +94,7 @@ export class GitService {
    */
   getCurrentBranch(): string | undefined {
     try {
-      const result = this.execGit(["rev-parse", "--abbrev-ref", "HEAD"]);
+      const result = this.execGitSync(["rev-parse", "--abbrev-ref", "HEAD"]);
       const branch = result.stdout.trim();
       return branch === "HEAD" ? undefined : branch; // detached HEAD 时返回 undefined
     } catch {
@@ -108,7 +108,7 @@ export class GitService {
   getStagedFiles(): StagedFile[] {
     try {
       // --porcelain=v1 保证输出格式稳定
-      const result = this.execGit(["status", "--porcelain=v1"]);
+      const result = this.execGitSync(["status", "--porcelain=v1"]);
       const lines = result.stdout.split("\n").filter(Boolean);
       const staged: StagedFile[] = [];
 
@@ -166,7 +166,7 @@ export class GitService {
    */
   getStagedDiff(options?: { maxLength?: number }): string {
     try {
-      const result = this.execGit(["diff", "--cached", "--no-color"]);
+      const result = this.execGitSync(["diff", "--cached", "--no-color"]);
       let diff = result.stdout;
 
       if (options?.maxLength && diff.length > options.maxLength) {
@@ -184,7 +184,7 @@ export class GitService {
    */
   getStagedDiffStat(): string {
     try {
-      const result = this.execGit(["diff", "--cached", "--stat", "--no-color"]);
+      const result = this.execGitSync(["diff", "--cached", "--stat", "--no-color"]);
       return result.stdout;
     } catch {
       return "";
@@ -200,27 +200,27 @@ export class GitService {
     if (!message.trim()) {
       throw new Error("Commit message cannot be empty");
     }
-    this.execGit(["commit", "-m", message]);
+    this.execGitSync(["commit", "-m", message]);
   }
 
   /**
    * 执行 git add
    * @param paths 要添加的文件路径，默认添加所有变更
    */
-  add(paths?: string[]): void {
+  addSync(paths?: string[]): void {
     const args = ["add"];
     if (paths && paths.length > 0) {
       args.push(...paths);
     } else {
       args.push("-A");
     }
-    this.execGit(args);
+    this.execGitSync(args);
   }
 
   /**
    * 内部方法：执行 git 命令
    */
-  private execGit(args: string[]): GitExecResult {
+  private execGitSync(args: string[]): GitExecResult {
     const result = execaSync("git", args, {
       cwd: this.cwd,
       reject: true,
@@ -231,6 +231,19 @@ export class GitService {
     return {
       stdout: typeof result.stdout === "string" ? result.stdout : String(result.stdout ?? "")
     };
+  }
+
+  private execGit(args: string[]): ResultPromise<{
+    cwd: string;
+    reject: true;
+    stdio: ["pipe", "pipe", "pipe"];
+  }> {
+    return execa("git", args, {
+      cwd: this.cwd,
+      reject: true,
+      // 避免输出到控制台
+      stdio: ["pipe", "pipe", "pipe"]
+    });
   }
 }
 

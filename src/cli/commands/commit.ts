@@ -53,7 +53,7 @@ export async function handleCommit(
     const s = spinner();
     s.start("暂存所有变更...");
     try {
-      gitService.add();
+      gitService.addSync();
       s.stop("已暂存所有变更");
     } catch (error) {
       s.stop("暂存失败");
@@ -94,7 +94,7 @@ export async function handleCommit(
   let candidates: string[] = [];
   try {
     const commitService = new CommitService(config);
-    const result = await commitService.generateCommitMessage({ candidateCount: 3 });
+    const result = await commitService.generateCommitMessage({ candidateCount: 1 });
     candidates = result.candidates;
     s.stop("提交信息生成完成");
   } catch (error) {
@@ -117,8 +117,7 @@ export async function handleCommit(
 
   // 10. 模拟运行模式
   if (dryRun) {
-    log.info(pc.cyan("\n[模拟运行] 将使用以下提交信息："));
-    log.info(pc.bold(selectedMessage));
+    log.info(`${pc.green("[Dry Run Mode]")} 将使用以下提交信息：\n${pc.bold(selectedMessage)}`);
     return 0;
   }
 
@@ -166,13 +165,12 @@ function displayStagedFiles(files: StagedFile[]): void {
   };
 
   log.info(pc.bold(`暂存的变更 (${files.length} 个文件):`));
-  let message = "";
-  for (const file of files) {
+  const messages: string[] = files.map((file) => {
     const label = statusLabels[file.status] ?? pc.dim(file.status);
     const path = file.oldPath ? `${file.oldPath} → ${file.path}` : file.path;
-    message += `${label} ${path}\n`;
-  }
-  log.message(message);
+    return `${label} ${path}`;
+  });
+  log.message(messages.join("\n"));
 }
 
 /**

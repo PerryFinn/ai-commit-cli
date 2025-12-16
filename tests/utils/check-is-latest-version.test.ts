@@ -38,7 +38,12 @@ vi.mock("@npmcli/config", () => {
 
 vi.mock("@clack/prompts", () => ({
   log: {
+    message: vi.fn(),
     info: vi.fn(),
+    success: vi.fn(),
+    step: vi.fn(),
+    warn: vi.fn(),
+    warning: vi.fn(),
     error: vi.fn()
   }
 }));
@@ -146,7 +151,6 @@ describe("checkLatestVersion", () => {
     await checkLatestVersion();
 
     expect(registryJsonMock).toHaveBeenCalledTimes(1);
-    expect(log.error).toHaveBeenCalledTimes(1);
     expect(ConfigMock).toHaveBeenCalledTimes(1);
     expect(configLoadMock).toHaveBeenCalledTimes(1);
 

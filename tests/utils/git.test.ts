@@ -236,7 +236,7 @@ describe("GitService - 单元测试", () => {
       const testFile = path.join(tempDir, "add-test.txt");
       fs.writeFileSync(testFile, "content");
 
-      gitService.add(["add-test.txt"]);
+      gitService.addSync(["add-test.txt"]);
 
       const staged = gitService.getStagedFiles();
       expect(staged).toHaveLength(1);
@@ -247,7 +247,7 @@ describe("GitService - 单元测试", () => {
       fs.writeFileSync(path.join(tempDir, "file1.txt"), "1");
       fs.writeFileSync(path.join(tempDir, "file2.txt"), "2");
 
-      gitService.add();
+      gitService.addSync();
 
       const staged = gitService.getStagedFiles();
       expect(staged).toHaveLength(2);
